@@ -18,8 +18,8 @@ use App\Http\Controllers\PurchaseController;
 */
 
 // PG01,05
-Route::get('/', [ItemController::class, 'index'])->name('items.index');       // PG01
-Route::get('/item/{item_id}', [ItemController::class, 'show'])->name('items.show'); // PG05
+Route::get('/', [ItemController::class, 'index'])->name('items.index');
+Route::get('/item/{item}', [ItemController::class, 'show'])->name('items.show');
 
 // 検索
 Route::get('/search', [ItemController::class, 'search'])->name('items.search');
@@ -28,12 +28,12 @@ Route::get('/search', [ItemController::class, 'search'])->name('items.search');
 Route::middleware('auth')->group(function () {
 
     // PG06
-    Route::get('/purchase/{item_id}', [PurchaseController::class, 'purchase'])->name('purchase.show');
-    Route::post('/purchase/{item_id}', [PurchaseController::class, 'checkout'])->name('purchase.checkout');
+    Route::get('/purchase/{item}', [PurchaseController::class, 'purchase'])->name('purchase.show');
+    Route::post('/purchase/{item}', [PurchaseController::class, 'checkout'])->name('purchase.checkout');
 
     // PG07
-    Route::get('/purchase/address/{item_id}', [PurchaseController::class, 'editAddress'])->name('address.edit');
-    Route::patch('/purchase/address/{item_id}', [PurchaseController::class, 'updateAddress'])->name('address.update');
+    Route::get('/purchase/address/{item}', [PurchaseController::class, 'editAddress'])->name('purchase.address.edit');
+    Route::patch('/purchase/address/{item}', [PurchaseController::class, 'updateAddress'])->name('purchase.address.update');
 
     // PG08
     Route::get('/sell', [ItemController::class, 'create'])->name('sell.create');
@@ -45,12 +45,4 @@ Route::middleware('auth')->group(function () {
     // PG10
     Route::get('/mypage/profile', [MypageController::class, 'edit'])->name('profile.edit');
     Route::patch('/mypage/profile', [MypageController::class, 'update'])->name('profile.update');
-});
-
-//PG03,04
-Route::middleware('guest')->group(function () {
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
