@@ -15,8 +15,7 @@ class ItemController extends Controller
     public function index()
     {
         $query = Item::query()
-            ->with(['user'])
-            ->latest();
+            ->with(['seller'])->withCount(['likes', 'comments'])->latest();
 
         // FN014-4
         if (auth()->check()) {
@@ -27,7 +26,6 @@ class ItemController extends Controller
 
         return view('item.index', compact('items'));
     }
-
 
     public function show($item)
     {
