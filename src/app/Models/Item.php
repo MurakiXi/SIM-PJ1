@@ -14,11 +14,6 @@ class Item extends Model
         return $this->belongsTo(User::class, 'seller_id');
     }
 
-    public function buyer()
-    {
-        return $this->belongsTo(User::class, 'buyer_id');
-    }
-
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'category_item')->withTimestamps();
@@ -42,10 +37,5 @@ class Item extends Model
     public function order()
     {
         return $this->hasOne(Order::class);
-    }
-
-    public function addresses()
-    {
-        return $this->hasMany(Address::class);
     }
 }

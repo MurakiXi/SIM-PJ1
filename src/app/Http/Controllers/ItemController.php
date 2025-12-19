@@ -5,27 +5,54 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Item;
 use App\Models\Category;
 use App\Http\Requests\ExhibitionRequest;
 
+
 class ItemController extends Controller
 {
-    //
-    public function index()
+    private function baseQuery(): Builder
     {
-        $query = Item::query()
-            ->with(['seller'])->withCount(['likes', 'comments'])->latest();
+        return Item::query()
+            ->with(['seller'])
+            ->withCount(['likes', 'comments'])
+            ->withExists('order')
+            ->when(auth()->check(), function (Builder $q) {
+                // for FN014-4
+                $q->where('seller_id', '!=', auth()->id());
+            })
+            ->latest();
+    }
 
-        // FN014-4
-        if (auth()->check()) {
-            $query->where('seller_id', '!=', auth()->id());
+    public function index(Request $request)
+    {
+        $tab     = (string) $request->query('tab', '');
+        $keyword = trim((string) $request->query('keyword', ''));
+
+        $query = $this->baseQuery();
+
+        $query->when($keyword !== '', function (Builder $q) use ($keyword) {
+            $q->where('name', 'like', "%{$keyword}%");
+        });
+
+        // for PG02
+        if ($tab === 'mylist') {
+            if (auth()->check()) {
+                $query->whereHas('likes', function (Builder $q) {
+                    $q->where('user_id', auth()->id());
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
-        $items = $query->paginate(20);
+        $items = $query->paginate(20)->appends($request->only('tab', 'keyword'));
 
-        return view('item.index', compact('items'));
+        return view('item.index', compact('items', 'tab', 'keyword'));
     }
+
 
     public function show($item)
     {
@@ -37,18 +64,10 @@ class ItemController extends Controller
     {
         $keyword = trim((string) $request->input('keyword', ''));
 
-        $query = Item::query()->latest();
-
-        // FN014-4
-        if (auth()->check()) {
-            $query->where('seller_id', '!=', auth()->id());
-        }
-
-        if ($keyword !== '') {
-            $query->where('name', 'like', "%{$keyword}%");
-        }
-
-        $items = $query
+        $items = $this->baseQuery()
+            ->when($keyword !== '', function (Builder $q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%");
+            })
             ->paginate(20)
             ->appends($request->only('keyword'));
 

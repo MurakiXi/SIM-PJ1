@@ -20,7 +20,7 @@ class CreateItemsTable extends Migration
             $table->string('brand')->nullable();
             $table->text('description');
             $table->unsignedInteger('price');
-            $table->string('imagepath');
+            $table->string('image_path');
             $table->enum('status', ['on_sale', 'processing', 'sold'])->default('on_sale');
             $table->unsignedTinyInteger('condition');
             $table->timestamp('processing_expires_at')->nullable();

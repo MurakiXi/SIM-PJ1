@@ -18,7 +18,7 @@ class CreateOrdersTable extends Migration
             $table->foreignId('item_id')->constrained()->onDelete('restrict')->unique();
             $table->foreignId('buyer_id')->constrained('users')->onDelete('restrict');
             $table->enum('payment_method', ['card', 'convenience_store']);
-            $table->string('stripe_session_id')->unique();
+            $table->string('stripe_session_id')->unique()->nullable();
             $table->string('ship_postal_code');
             $table->string('ship_address');
             $table->string('ship_building')->nullable();
