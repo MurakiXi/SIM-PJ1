@@ -54,25 +54,34 @@ class ItemController extends Controller
     }
 
 
-    public function show($item)
+    public function show(Item $item)
     {
-        $item = Item::findOrFail($item);
-        return view('item.show', compact('item'));
+        $item->load([
+            'seller',
+            'categories',
+            'comments.user',
+        ])->loadCount(['likes', 'comments']);
+
+        $isLiked = auth()->check()
+            ? $item->likes()->where('user_id', auth()->id())->exists()
+            : false;
+
+        return view('item.show', compact('item', 'isLiked'));
     }
+
 
     public function search(Request $request)
     {
-        $keyword = trim((string) $request->input('keyword', ''));
+        $keyword = trim((string) $request->query('keyword', ''));
+        $tab = (string) $request->query('tab', '');
 
-        $items = $this->baseQuery()
-            ->when($keyword !== '', function (Builder $q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%");
-            })
-            ->paginate(20)
-            ->appends($request->only('keyword'));
-
-        return view('item.index', compact('items', 'keyword'));
+        return redirect()->route('items.index', [
+            'keyword' => $keyword,
+            'tab' => $tab,
+        ]);
     }
+
+
 
 
     public function create()
