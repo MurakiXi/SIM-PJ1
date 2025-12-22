@@ -4,38 +4,64 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'coachtechフリマ')</title>
+    <title>@yield('title', 'COACHTECHフリマ')</title>
+    <link rel="stylesheet" href="{{ asset('css/sanitize.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/common.css') }}" />
+    @yield('css')
 </head>
 
 <body>
-    <header style="display:flex; gap:16px; align-items:center; padding:12px; border-bottom:1px solid #ddd;">
-        <div>
-            <a href="{{ route('items.index') }}">coachtechフリマ</a>
+    <header class="header">
+        <div class="header__inner">
+            <div class="header__logo">
+                <a href="{{ route('items.index') }}">
+                    <img src="{{ asset('assets/images/coachtech-header-logo.png') }}" alt="COACHTECHフリマ">
+                </a>
+            </div>
         </div>
-
-        <form action="{{ route('items.search') }}" method="GET" style="flex:1; display:flex; gap:8px;">
-            <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="商品名で検索" style="flex:1;">
-            <button type="submit">検索</button>
-        </form>
-
-        <nav style="display:flex; gap:8px;">
-            @guest
-            <a href="{{ route('login') }}">login</a>
-            <a href="{{ route('register') }}">register</a>
-            @endguest
-
-            @auth
-            <a href="{{ route('sell.create') }}">出品</a>
-            <a href="{{ route('mypage') }}">mypage</a>
-            <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                @csrf
-                <button type="submit">logout</button>
+        <div class="header__form">
+            <form class="header__form-inner" action="{{ route('items.search') }}" method="GET">
+                <input class="header__form-input" type="text" name="keyword" value="{{ request('keyword') }}" placeholder="なにをお探しですか？">
+                <button class="header__form-submit" type="submit">検索</button>
             </form>
-            @endauth
-        </nav>
+        </div>
+        @guest
+        <div class="header__nav-inner">
+            <a class="header__nav-item" href="{{ route('login') }}">
+                ログイン
+            </a>
+            <a class="header__nav-item" href="{{ route('register') }}">
+                マイページ
+            </a>
+            <a class="header__nav-item-sell" href="{{ route('sell.create') }}">
+                出品
+            </a>
+        </div>
+        @endguest
+
+        @auth
+        <div class="header__nav">
+            <div class="header-nav__item">
+                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                    @csrf
+                    <button type="submit">ログアウト</button>
+                </form>
+            </div>
+            <a href="{{ route('register') }}">
+                <div class="header-nav__item">
+                    マイページ
+                </div>
+            </a>
+            <a href="{{ route('sell.create') }}">
+                <div class="header-nav__item-sell">
+                    出品
+                </div>
+            </a>
+        </div>
+        @endauth
     </header>
 
-    <main style="padding:16px;">
+    <main>
         @yield('content')
     </main>
 </body>

@@ -1,0 +1,48 @@
+.header {
+    background: #000;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header__logo {
+    margin: 20px;
+}
+
+.header__form {
+    width: 50%;
+    margin: 20px auto;
+}
+
+.header__form-inner {
+    width: 100%;
+}
+
+.header__form-input {
+    width: 80%;
+    height: 40px;
+}
+
+.header__nav-inner {
+    width: 20%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 40px;
+}
+
+.header__nav-item {
+    color: #fff;
+    text-decoration: none;
+    margin: 25px auto;
+}
+
+
+.header__nav-item-sell {
+    height: 40px;
+    border-radius: 3px;
+    text-align: center;
+    color: #000;
+    background: #fff;
+    text-decoration: none;
+    padding: 5px 20px;
+    margin: 20px auto;
+}

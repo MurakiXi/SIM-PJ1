@@ -9,6 +9,18 @@ class Item extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'seller_id',
+        'name',
+        'brand',
+        'description',
+        'price',
+        'imagepath',
+        'status',
+        'condition',
+        'processing_expires_at',
+    ];
+
     public function seller()
     {
         return $this->belongsTo(User::class, 'seller_id');

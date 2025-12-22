@@ -1,0 +1,22 @@
+.list__head {
+    display: flex;
+    justify-content: left;
+}
+
+.list__inner {}
+
+.list__card {
+    margin: 50px 2% auto;
+    width: 20%;
+    height: 20%;
+    display: inline-block;
+}
+
+.list__card-image img {
+    width: 100%;
+}
+
+.list__card-name {
+    color: #000;
+    text-decoration: none;
+}
