@@ -4,10 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\ItemCondition;
+
 
 class Item extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'condition' => ItemCondition::class,
+    ];
 
     protected $fillable = [
         'seller_id',
@@ -15,7 +21,7 @@ class Item extends Model
         'brand',
         'description',
         'price',
-        'imagepath',
+        'image_path',
         'status',
         'condition',
         'processing_expires_at',

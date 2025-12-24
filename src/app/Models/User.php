@@ -49,8 +49,10 @@ class User extends Authenticatable
 
     public function boughtItems()
     {
-        return $this->hasMany(Item::class, 'buyer_id');
+        return $this->belongsToMany(Item::class, 'orders', 'buyer_id', 'item_id')
+            ->withTimestamps();
     }
+
 
     public function likes()
     {
@@ -72,8 +74,8 @@ class User extends Authenticatable
         return $this->hasMany(Order::class, 'buyer_id');
     }
 
-    public function addresses()
+    public function address()
     {
-        return $this->hasMany(Address::class);
+        return $this->hasOne(Address::class);
     }
 }
