@@ -16,7 +16,7 @@ class CreateItemsTable extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('seller_id')->constrained('users')->onDelete('restrict');
-            $table->string('name');
+            $table->string('name')->index();
             $table->string('brand')->nullable();
             $table->text('description');
             $table->unsignedInteger('price');

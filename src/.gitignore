@@ -3,6 +3,8 @@
 /public/storage
 /storage/*.key
 /vendor
+/src/vendor
+/src/node_modules
 .env
 .env.backup
 .phpunit.result.cache
@@ -13,3 +15,10 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/src/.env
+/storage/logs
+/src/storage/logs
+/storage/framework
+/src/storage/framework
+/bootstrap/cache/*.php
+/src/bootstrap/cache/*.php

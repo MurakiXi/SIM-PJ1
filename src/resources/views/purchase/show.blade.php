@@ -31,7 +31,7 @@
             <div class="purchase__data-address">
                 <div class="purchase__data-address-head">
                     <div class="purchase__data-title">配送先</div>
-                    <a class="purchase__data-change">変更する</a>
+                    <a href="" class="purchase__data-change">変更する</a>
                 </div>
                 <div class="purchase__data-address-content">
                     @if($address)
@@ -55,6 +55,8 @@
                     <td class="purchase__list-item">
                         ¥{{ number_format($item->price) }}
                     </td>
+                </tr>
+                <tr class="purchase__list-row">
                     <th class="purchase__list-head">
                         支払い方法
                     </th>
@@ -66,6 +68,7 @@
             <button class="purchase__button-submit" type="submit">
                 購入する
             </button>
+        </div>
     </form>
 </div>
 

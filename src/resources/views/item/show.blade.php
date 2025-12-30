@@ -13,21 +13,43 @@
     </div>
     <div class="show__data">
         <h1>{{ $item->name }}</h1>
-        @if(empty($item->buyer_id))
+        @if(!($item->status === 'sold'))
         <span class="show__data-price">¥{{ number_format($item->price) }}</span>
         <span class="show__data-price--p">(税込)</span>
-
         @endif
-        @if(!empty($item->buyer_id))
+        @if($item->status === 'sold')
         <p style="font-weight:bold;">Sold</p>
         @endif
-        <div>
-            <img class="show__data-fav" src="{{ asset('assets/images/heart-blank.png') }}" alt="いいね">
-            <img class="show__data-fav" src="{{ asset('assets/images/comment.png') }}" alt="コメント">
+        <table class="show__table">
+            <tr class="show__table-row">
+                <th class="show__table-item">
+                    @auth
+                    <form action="{{ route('items.like', $item) }}" method="post">
+                        @csrf
+                        <button type="submit" class="like-button">
+                            <img class="show__data-fav"
+                                src="{{ $isLiked
+                                ? asset('assets/images/heart-red.png')
+                                : asset('assets/images/heart-blank.png') }}"
+                                alt="いいね">
+                        </button>
+                    </form>
+                    @else
+                    <img class="show__data-fav" src="{{ asset('assets/images/heart-blank.png') }}" alt="いいね">
+                    @endauth
+                </th>
 
-            {{ $item->likes_count ?? 0 }}
-            {{ $item->comments_count ?? 0 }}
-        </div>
+                <th class="show__table-item">
+                    <img class="show__data-fav" src="{{ asset('assets/images/comment.png') }}" alt="コメント">
+                </th>
+            </tr>
+
+            <tr class="show__table-row">
+                <th class="show__table-item">{{ $item->likes_count ?? 0 }}</th>
+                <th class="show__table-item">{{ $item->comments_count ?? 0 }}</th>
+            </tr>
+        </table>
+
         <a href="{{ route('purchase.show', $item) }}" class="show__purchase">購入手続きへ</a>
         <h2>商品説明</h2>
         <div class="show__description">{{ $item->description }}</div>
@@ -49,7 +71,12 @@
             </tr>
         </table>
         <h2>コメント({{ $item->comments_count ?? 0 }})</h2>
-
+        @foreach($item->comments as $comment)
+        <div class="show__comment">
+            <div class="show__comment-user">{{ $comment->user->name }}</div>
+            <div class="show__comment-body">{{ $comment->body }}</div>
+        </div>
+        @endforeach
     </div>
 </div>
 

@@ -21,9 +21,6 @@ use App\Http\Controllers\PurchaseController;
 Route::get('/', [ItemController::class, 'index'])->name('items.index');
 Route::get('/item/{item}', [ItemController::class, 'show'])->name('items.show');
 
-// 検索
-Route::get('/search', [ItemController::class, 'search'])->name('items.search');
-
 //PG06,07,08,09,10
 Route::middleware('auth')->group(function () {
 
@@ -45,4 +42,10 @@ Route::middleware('auth')->group(function () {
     // PG10
     Route::get('/mypage/profile', [MypageController::class, 'edit'])->name('profile.edit');
     Route::patch('/mypage/profile', [MypageController::class, 'update'])->name('profile.update');
+
+    Route::get('/purchase/{item}/success', [PurchaseController::class, 'success'])->name('purchase.success');
+    Route::get('/purchase/{item}/cancel',  [PurchaseController::class, 'cancel'])->name('purchase.cancel');
+
+    Route::post('/item/{item}/like', [ItemController::class, 'toggleLike'])->name('items.like');
+    Route::post('/item/{item}/comment', [ItemController::class, 'storeComment'])->name('items.comment');
 });

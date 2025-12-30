@@ -19,11 +19,14 @@ $tab = request('tab'); // null or 'mylist'
     <div class="list__head-mylist">
         <a href="{{ route('items.index', array_filter(['tab' => 'mylist', 'keyword' => request('keyword')])) }}">マイリスト</a>
     </div>
-
-    @if($tab === 'mylist' && auth()->guest())
-    <p>（未認証のため表示できません）</p>
-    @else
 </div>
+@guest
+@if($tab === 'mylist')
+<p>（未認証のため表示できません）</p>
+@endif
+@endguest
+
+@if(!($tab === 'mylist' && auth()->guest()))
 <div class="list__inner">
     @forelse($items as $item)
     <div class="list__card">
@@ -31,7 +34,7 @@ $tab = request('tab'); // null or 'mylist'
             <img src="{{ $item->image_path ? asset('storage/'.$item->image_path) : '' }}" alt="{{ $item->name }}">
         </div>
         <a class="list__card-name" href="{{ route('items.show', $item) }}">{{ $item->name }}</a>
-        @if(!empty($item->buyer_id))
+        @if($item->status === 'sold')
         <div class="list__inner-sold">Sold</div>
         @endif
 
@@ -42,5 +45,5 @@ $tab = request('tab'); // null or 'mylist'
     @endforelse
 </div>
 
-</div>@endif
+@endif
 @endsection

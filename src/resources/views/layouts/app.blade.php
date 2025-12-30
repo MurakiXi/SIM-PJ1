@@ -20,7 +20,10 @@
             </div>
         </div>
         <div class="header__form">
-            <form class="header__form-inner" action="{{ route('items.search') }}" method="GET">
+            <form class="header__form-inner" action="{{ route('items.index') }}" method="GET">
+                @if(request('tab')==='mylist')
+                <input type="hidden" name="tab" value="mylist">
+                @endif
                 <input class="header__form-input" type="text" name="keyword" value="{{ request('keyword') }}" placeholder="なにをお探しですか？">
                 <button class="header__form-submit" type="submit">検索</button>
             </form>
@@ -47,7 +50,7 @@
                     <button type="submit">ログアウト</button>
                 </form>
             </div>
-            <a href="{{ route('register') }}">
+            <a href="{{ route('mypage') }}">
                 <div class="header-nav__item">
                     マイページ
                 </div>

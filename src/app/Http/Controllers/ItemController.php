@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Item;
+use App\Models\Like;
 use App\Models\Category;
 use App\Http\Requests\ExhibitionRequest;
-
 
 class ItemController extends Controller
 {
@@ -53,7 +53,6 @@ class ItemController extends Controller
         return view('item.index', compact('items', 'tab', 'keyword'));
     }
 
-
     public function show(Item $item)
     {
         $item->load([
@@ -69,7 +68,6 @@ class ItemController extends Controller
         return view('item.show', compact('item', 'isLiked'));
     }
 
-
     public function search(Request $request)
     {
         $keyword = trim((string) $request->query('keyword', ''));
@@ -80,9 +78,6 @@ class ItemController extends Controller
             'tab' => $tab,
         ]);
     }
-
-
-
 
     public function create()
     {
@@ -134,5 +129,20 @@ class ItemController extends Controller
 
             throw $e;
         }
+    }
+
+    public function toggleLike(Item $item, Request $request)
+    {
+        $user = $request->user();
+
+        $like = Like::where('user_id', $user->id)->where('item_id', $item->id)->first();
+
+        if ($like) {
+            $like->delete();
+        } else {
+            Like::create(['user_id' => $user->id, 'item_id' => $item->id]);
+        }
+
+        return back();
     }
 }

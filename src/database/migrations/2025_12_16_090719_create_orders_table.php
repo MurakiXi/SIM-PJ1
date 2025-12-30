@@ -22,6 +22,8 @@ class CreateOrdersTable extends Migration
             $table->string('ship_postal_code');
             $table->string('ship_address');
             $table->string('ship_building')->nullable();
+            $table->unsignedInteger('price_at_purchase');
+            $table->enum('payment_status', ['on_sale', 'processing', 'sold']);
             $table->timestamps();
         });
     }
