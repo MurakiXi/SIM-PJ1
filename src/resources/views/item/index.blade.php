@@ -36,7 +36,10 @@ $tab = request('tab'); // null or 'mylist'
         <a class="list__card-name" href="{{ route('items.show', $item) }}">{{ $item->name }}</a>
         @if($item->status === 'sold')
         <div class="list__inner-sold">Sold</div>
+        @elseif($item->status === 'processing')
+        <div class="list__inner-processing">Processing</div>
         @endif
+
 
     </div>
 

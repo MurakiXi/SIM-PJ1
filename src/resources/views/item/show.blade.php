@@ -13,12 +13,15 @@
     </div>
     <div class="show__data">
         <h1>{{ $item->name }}</h1>
-        @if(!($item->status === 'sold'))
+        @if($item->status === 'on_sale')
         <span class="show__data-price">¥{{ number_format($item->price) }}</span>
         <span class="show__data-price--p">(税込)</span>
-        @endif
-        @if($item->status === 'sold')
-        <p style="font-weight:bold;">Sold</p>
+        @elseif($item->status === 'processing')
+        <div class="show__data-processing">Processing</div>
+        @elseif($item->status === 'sold')
+        <div class="show__data-sold">Sold</div>
+        @else
+        <div class="show__data-unknown">Status: {{ $item->status }}</div>
         @endif
         <table class="show__table">
             <tr class="show__table-row">
@@ -50,7 +53,13 @@
             </tr>
         </table>
 
+        @if($item->status === 'on_sale')
         <a href="{{ route('purchase.show', $item) }}" class="show__purchase">購入手続きへ</a>
+        @elseif($item->status === 'processing')
+        <div class="show__purchase-disabled">購入手続き中</div>
+        @else
+        <div class="show__purchase-disabled">売約済み</div>
+        @endif
         <h2>商品説明</h2>
         <div class="show__description">{{ $item->description }}</div>
         <h2>商品の情報</h2>

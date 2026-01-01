@@ -55,6 +55,9 @@ class ItemController extends Controller
 
     public function show(Item $item)
     {
+        $item->releaseProcessingIfExpired();
+        $item->refresh();
+        
         $item->load([
             'seller',
             'categories',

@@ -133,6 +133,23 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        'name' => [
+            'required' => 'お名前を入力してください',
+            'max'      => 'お名前は20文字以内で入力してください',
+        ],
+        'email' => [
+            'required' => 'メールアドレスを入力してください',
+            'email'    => 'メールアドレスはメール形式で入力してください',
+        ],
+        'password' => [
+            'required'  => 'パスワードを入力してください',
+            'min'       => 'パスワードは8文字以上で入力してください',
+            'confirmed' => 'パスワードと一致しません',
+        ],
+        'password_confirmation' => [
+            'required' => 'パスワードを入力してください',
+            'min'      => 'パスワードは8文字以上で入力してください',
+        ],
     ],
 
     /*
