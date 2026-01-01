@@ -17,7 +17,7 @@ class PurchaseController extends Controller
     //
     public function purchase(Item $item, Request $request)
     {
-        $item->releaseProcessingIfExpired();   // ←追加
+        $item->releaseProcessingIfExpired();
         $item->refresh();
 
         $user = $request->user();
