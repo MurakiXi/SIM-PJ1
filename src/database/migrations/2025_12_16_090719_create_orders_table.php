@@ -29,6 +29,7 @@ class CreateOrdersTable extends Migration
             $table->timestamp('paid_at')->nullable();
             $table->timestamp('canceled_at')->nullable();
             $table->timestamp('expired_at')->nullable();
+            $table->index(['item_id', 'payment_status', 'reserved_until'], 'orders_item_status_reserved_idx');
         });
     }
 

@@ -10,6 +10,7 @@ use App\Models\Item;
 use App\Models\Like;
 use App\Models\Category;
 use App\Http\Requests\ExhibitionRequest;
+use App\Models\Order;
 
 class ItemController extends Controller
 {
@@ -18,7 +19,7 @@ class ItemController extends Controller
         return Item::query()
             ->with(['seller'])
             ->withCount(['likes', 'comments'])
-            ->withExists('order')
+            ->withExists('activeorder')
             ->when(auth()->check(), function (Builder $q) {
                 // for FN014-4
                 $q->where('seller_id', '!=', auth()->id());
@@ -28,6 +29,9 @@ class ItemController extends Controller
 
     public function index(Request $request)
     {
+        $this->releaseExpiredReservations();
+        $query = Item::query();
+
         $tab     = (string) $request->query('tab', '');
         $keyword = trim((string) $request->query('keyword', ''));
 
@@ -57,7 +61,7 @@ class ItemController extends Controller
     {
         $item->releaseProcessingIfExpired();
         $item->refresh();
-        
+
         $item->load([
             'seller',
             'categories',
@@ -147,5 +151,40 @@ class ItemController extends Controller
         }
 
         return back();
+    }
+
+    private function releaseExpiredReservations(): void
+    {
+        $now = now();
+
+        DB::transaction(function () use ($now) {
+
+            Order::where('payment_status', 'pending')
+                ->where('reserved_until', '<=', $now)
+                ->update([
+                    'payment_status' => 'expired',
+                    'expired_at'      => $now,
+                    'updated_at'      => $now,
+                ]);
+
+            Item::where('status', 'processing')
+                ->whereNotNull('processing_expires_at')
+                ->where('processing_expires_at', '<=', $now)
+
+                ->whereDoesntHave('orders', function ($q) {
+                    $q->where('payment_status', 'paid');
+                })
+
+                ->whereDoesntHave('orders', function ($q) use ($now) {
+                    $q->where('payment_status', 'pending')
+                        ->where('reserved_until', '>', $now);
+                })
+
+                ->update([
+                    'status'               => 'on_sale',
+                    'processing_expires_at' => null,
+                    'updated_at'           => $now,
+                ]);
+        });
     }
 }

@@ -26,10 +26,13 @@ class PurchaseController extends Controller
             abort(403);
         }
 
-        if ($item->order()->exists()) {
+        if ($item->status === 'sold') {
             abort(404);
         }
 
+        if ($item->activeOrder()->exists()) {
+            abort(404);
+        }
         $address = $user->address;
 
         $paymentMethods = [
@@ -52,7 +55,7 @@ class PurchaseController extends Controller
             abort(403);
         }
 
-        if ($item->status !== 'on_sale' || $item->order()->exists()) {
+        if ($item->status !== 'on_sale' || $item->activeOrder()->exists()) {
             return back()->withErrors(['purchase' => 'この商品は購入できません。']);
         }
 
@@ -67,9 +70,12 @@ class PurchaseController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
+        $reservedUntil = now()->addMinutes(30);
+
         $session = StripeSession::create([
             'mode' => 'payment',
             'payment_method_types' => [$stripeMethod],
+            'expires_at' => $reservedUntil->timestamp,
             'customer_email' => $user->email,
             'line_items' => [[
                 'quantity' => 1,
@@ -85,15 +91,20 @@ class PurchaseController extends Controller
             'cancel_url'  => route('purchase.cancel', $item),
         ]);
 
-        DB::transaction(function () use ($user, $item, $paymentMethod, $address, $session) {
-            Item::whereKey($item->id)->lockForUpdate()->first();
-            $item->update([
+        DB::transaction(function () use ($user, $item, $paymentMethod, $address, $session, $reservedUntil) {
+            $lockedItem = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedItem->status !== 'on_sale' || $lockedItem->activeOrder()->exists()) {
+                throw new \RuntimeException('This item is not available.');
+            }
+
+            $lockedItem->update([
                 'status' => 'processing',
-                'processing_expires_at' => now()->addMinutes(30),
+                'processing_expires_at' => $reservedUntil,
             ]);
 
             Order::create([
-                'item_id'           => $item->id,
+                'item_id'           => $lockedItem->id,
                 'buyer_id'          => $user->id,
                 'payment_method'    => $paymentMethod,
                 'stripe_session_id' => $session->id,
@@ -101,14 +112,15 @@ class PurchaseController extends Controller
                 'ship_address'      => $address->address,
                 'ship_building'     => $address->building,
 
-                'price_at_purchase' => $item->price,
+                'price_at_purchase' => $lockedItem->price,
                 'payment_status'    => 'pending',
-                'reserved_until'    => now()->addMinutes(30),
+                'reserved_until'    => $reservedUntil,
             ]);
         });
 
         return redirect()->away($session->url);
     }
+
 
     public function cancel(Request $request, Item $item)
     {
