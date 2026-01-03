@@ -12,6 +12,9 @@
 <div class="purchase__grid">
     <form action="{{route('purchase.checkout',$item)}}" class="purchase__button" method="post">
         @csrf
+        @if($address)
+        <input type="hidden" name="address_id" value="{{ $address->id }}">
+        @endif
         <div class="purchase__data">
             <div class="purchase__data-item">
                 <div class="purchase-data-image">
@@ -27,11 +30,23 @@
                     <option value="convenience_store">コンビニ払い</option>
                     <option value="card">カード支払い</option>
                 </select>
+                @error('payment_method')
+                <p class="error">{{ $message }}</p>
+                @enderror
+
+                @error('address_id')
+                <p class="error">{{ $message }}</p>
+                @enderror
+
+                @error('purchase')
+                <p class="error">{{ $message }}</p>
+                @enderror
+
             </div>
             <div class="purchase__data-address">
                 <div class="purchase__data-address-head">
                     <div class="purchase__data-title">配送先</div>
-                    <a href="" class="purchase__data-change">変更する</a>
+                    <a href="{{ route('purchase.address.edit', $item) }}" class="purchase__data-change">変更する</a>
                 </div>
                 <div class="purchase__data-address-content">
                     @if($address)
@@ -65,9 +80,16 @@
                     </td>
                 </tr>
             </table>
+            @if(!$address)
+            <button class="purchase__button-submit" type="button" disabled>
+                配送先住所を登録してください
+            </button>
+            @else
             <button class="purchase__button-submit" type="submit">
                 購入する
             </button>
+            @endif
+
         </div>
     </form>
 </div>

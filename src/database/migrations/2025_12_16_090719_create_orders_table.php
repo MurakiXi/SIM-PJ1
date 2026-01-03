@@ -15,7 +15,7 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained()->onDelete('restrict')->unique();
+            $table->foreignId('item_id')->constrained()->onDelete('restrict')->index();
             $table->foreignId('buyer_id')->constrained('users')->onDelete('restrict');
             $table->enum('payment_method', ['card', 'convenience_store']);
             $table->string('stripe_session_id')->unique()->nullable();
@@ -23,8 +23,12 @@ class CreateOrdersTable extends Migration
             $table->string('ship_address');
             $table->string('ship_building')->nullable();
             $table->unsignedInteger('price_at_purchase');
-            $table->enum('payment_status', ['on_sale', 'processing', 'sold']);
+            $table->enum('payment_status', ['pending', 'paid', 'canceled', 'expired']);
             $table->timestamps();
+            $table->timestamp('reserved_until');
+            $table->timestamp('paid_at')->nullable();
+            $table->timestamp('canceled_at')->nullable();
+            $table->timestamp('expired_at')->nullable();
         });
     }
 

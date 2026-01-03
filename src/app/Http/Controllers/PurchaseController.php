@@ -43,6 +43,9 @@ class PurchaseController extends Controller
 
     public function checkout(PurchaseRequest $request, Item $item)
     {
+        $item->releaseProcessingIfExpired();
+        $item->refresh();
+
         $user = $request->user();
 
         if ($item->seller_id === $user->id) {
@@ -83,7 +86,7 @@ class PurchaseController extends Controller
         ]);
 
         DB::transaction(function () use ($user, $item, $paymentMethod, $address, $session) {
-
+            Item::whereKey($item->id)->lockForUpdate()->first();
             $item->update([
                 'status' => 'processing',
                 'processing_expires_at' => now()->addMinutes(30),
@@ -97,6 +100,10 @@ class PurchaseController extends Controller
                 'ship_postal_code'  => $address->postal_code,
                 'ship_address'      => $address->address,
                 'ship_building'     => $address->building,
+
+                'price_at_purchase' => $item->price,
+                'payment_status'    => 'pending',
+                'reserved_until'    => now()->addMinutes(30),
             ]);
         });
 
@@ -109,9 +116,10 @@ class PurchaseController extends Controller
 
         $order = Order::where('item_id', $item->id)
             ->where('buyer_id', $user->id)
+            ->where('payment_status', 'pending')
             ->first();
 
-        // no order→top
+        // no order → top
         if (! $order) {
             return redirect()->route('items.index');
         }
@@ -128,11 +136,15 @@ class PurchaseController extends Controller
         }
 
         DB::transaction(function () use ($item, $order) {
-            $item->update([
-                'status' => 'on_sale',
-                'processing_expires_at' => null,
-            ]);
+            $lockedItem = Item::whereKey($item->id)->lockForUpdate()->first();
 
+            if ($lockedItem->status === 'processing') {
+                $lockedItem->update([
+                    'status' => 'on_sale',
+                    'processing_expires_at' => null,
+                ]);
+            }
+            $order->update(['payment_status' => 'canceled']);
             $order->delete();
         });
 

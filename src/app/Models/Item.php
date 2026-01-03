@@ -42,7 +42,7 @@ class Item extends Model
                 'processing_expires_at' => null,
             ]);
 
-            $item->order()->delete();
+            $item->order()->whereIn('payment_status', ['pending', 'canceled', 'expired'])->delete();
         });
     }
     public function isProcessingExpired(): bool

@@ -5,6 +5,8 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\StripeWebhookController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +22,9 @@ use App\Http\Controllers\PurchaseController;
 // PG01,05
 Route::get('/', [ItemController::class, 'index'])->name('items.index');
 Route::get('/item/{item}', [ItemController::class, 'show'])->name('items.show');
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->name('stripe.webhook');
 
 //PG06,07,08,09,10
 Route::middleware('auth')->group(function () {
