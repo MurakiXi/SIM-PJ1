@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use App\Http\Requests\LoginRequest as LoginFormRequest;
+use Illuminate\Support\Facades\Validator;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -35,6 +40,26 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::loginView(function () {
             return view('auth.login');
+        });
+
+        Fortify::authenticateUsing(function (Request $request) {
+
+            $form = new LoginFormRequest();
+            Validator::make(
+                $request->all(),
+                $form->rules(),
+                $form->messages()
+            )->validate();
+
+            $user = User::where('email', $request->input('email'))->first();
+
+            if (! $user || ! Hash::check($request->input('password'), $user->password)) {
+                throw ValidationException::withMessages([
+                    'email' => 'ログイン情報が登録されていません',
+                ]);
+            }
+
+            return $user;
         });
 
         RateLimiter::for('login', function (Request $request) {

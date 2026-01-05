@@ -17,20 +17,32 @@
     @csrf
     <div class="auth__register-title">ユーザー名</div>
     <div class="auth__register-input">
-        <input type="text" ,name="name">
+        <input type="text" name="name">
     </div>
+    @error('name')
+    <p class="auth__error">{{ $message }}</p>
+    @enderror
     <div class="auth__register-title">メールアドレス</div>
     <div class="auth__register-input">
-        <input type="text" ,name="email">
+        <input type="text" name="email">
     </div>
+    @error('email')
+    <p class="auth__error">{{ $message }}</p>
+    @enderror
     <div class="auth__login-title">パスワード</div>
     <div class="auth__login-input">
-        <input type="password" ,name="password">
+        <input type="password" name="password">
     </div>
+    @error('password')
+    <p class="auth__error">{{ $message }}</p>
+    @enderror
     <div class="auth__login-title">確認用パスワード</div>
     <div class="auth__login-input">
-        <input type="password" ,name="confirm">
+        <input type="password" name="password_confirmation">
     </div>
+    @error('password_confirmation')
+    <p class="auth__error">{{ $message }}</p>
+    @enderror
     <div class="auth__login-button">
         <button class="auth__login-button-submit" type="submit">
             登録する

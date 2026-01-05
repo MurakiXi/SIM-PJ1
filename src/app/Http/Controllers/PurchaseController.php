@@ -72,26 +72,7 @@ class PurchaseController extends Controller
 
         $reservedUntil = now()->addMinutes(30);
 
-        $session = StripeSession::create([
-            'mode' => 'payment',
-            'payment_method_types' => [$stripeMethod],
-            'expires_at' => $reservedUntil->timestamp,
-            'customer_email' => $user->email,
-            'line_items' => [[
-                'quantity' => 1,
-                'price_data' => [
-                    'currency' => 'jpy',
-                    'unit_amount' => $item->price,
-                    'product_data' => [
-                        'name' => $item->name,
-                    ],
-                ],
-            ]],
-            'success_url' => route('purchase.success', $item) . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url'  => route('purchase.cancel', $item),
-        ]);
-
-        DB::transaction(function () use ($user, $item, $paymentMethod, $address, $session, $reservedUntil) {
+        $order = DB::transaction(function () use ($user, $item, $paymentMethod, $address, $reservedUntil) {
             $lockedItem = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
 
             if ($lockedItem->status !== 'on_sale' || $lockedItem->activeOrder()->exists()) {
@@ -103,23 +84,69 @@ class PurchaseController extends Controller
                 'processing_expires_at' => $reservedUntil,
             ]);
 
-            Order::create([
+            return Order::create([
                 'item_id'           => $lockedItem->id,
                 'buyer_id'          => $user->id,
                 'payment_method'    => $paymentMethod,
-                'stripe_session_id' => $session->id,
+                'stripe_session_id' => null,
                 'ship_postal_code'  => $address->postal_code,
                 'ship_address'      => $address->address,
                 'ship_building'     => $address->building,
-
                 'price_at_purchase' => $lockedItem->price,
                 'payment_status'    => 'pending',
                 'reserved_until'    => $reservedUntil,
             ]);
         });
 
-        return redirect()->away($session->url);
+        try {
+            $session = StripeSession::create([
+                'mode' => 'payment',
+                'payment_method_types' => [$stripeMethod],
+                'expires_at' => $reservedUntil->timestamp,
+                'customer_email' => $user->email,
+                'metadata' => [
+                    'order_id' => (string) $order->id,
+                    'item_id'  => (string) $item->id,
+                    'buyer_id' => (string) $user->id,
+                ],
+                'line_items' => [[
+                    'quantity' => 1,
+                    'price_data' => [
+                        'currency' => 'jpy',
+                        'unit_amount' => $order->price_at_purchase,
+                        'product_data' => [
+                            'name' => $item->name,
+                        ],
+                    ],
+                ]],
+                'success_url' => route('purchase.success', $item) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url'  => route('purchase.cancel',  $item),
+            ]);
+
+            $order->update([
+                'stripe_session_id' => $session->id,
+            ]);
+
+            return redirect()->away($session->url);
+        } catch (\Throwable $e) {
+
+            DB::transaction(function () use ($order) {
+                $lockedItem = Item::whereKey($order->item_id)->lockForUpdate()->first();
+
+                if ($lockedItem && $lockedItem->status === 'processing') {
+                    $lockedItem->update([
+                        'status' => 'on_sale',
+                        'processing_expires_at' => null,
+                    ]);
+                }
+
+                $order->update(['payment_status' => 'canceled']);
+            });
+
+            throw $e;
+        }
     }
+
 
 
     public function cancel(Request $request, Item $item)
