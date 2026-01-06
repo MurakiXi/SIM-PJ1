@@ -45,8 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
 
     // PG10
-    Route::get('/mypage/profile', [MypageController::class, 'edit'])->name('profile.edit');
-    Route::patch('/mypage/profile', [MypageController::class, 'update'])->name('profile.update');
+    Route::get('/mypage/profile', [MypageController::class, 'edit'])->name('mypage.profile');
+    Route::patch('/mypage/profile', [MypageController::class, 'update'])->name('mypage.update');
 
     Route::get('/purchase/{item}/success', [PurchaseController::class, 'success'])->name('purchase.success');
     Route::get('/purchase/{item}/cancel',  [PurchaseController::class, 'cancel'])->name('purchase.cancel');

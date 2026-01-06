@@ -156,7 +156,9 @@ class PurchaseController extends Controller
         $order = Order::where('item_id', $item->id)
             ->where('buyer_id', $user->id)
             ->where('payment_status', 'pending')
+            ->latest('id')
             ->first();
+
 
         // no order → top
         if (! $order) {
@@ -174,8 +176,15 @@ class PurchaseController extends Controller
             }
         }
 
-        DB::transaction(function () use ($item, $order) {
-            $lockedItem = Item::whereKey($item->id)->lockForUpdate()->first();
+        $wasCanceled = false;
+
+        DB::transaction(function () use ($item, $order, &$wasCanceled) {
+            $lockedItem  = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
+            $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedOrder->payment_status === 'paid') {
+                return;
+            }
 
             if ($lockedItem->status === 'processing') {
                 $lockedItem->update([
@@ -183,11 +192,19 @@ class PurchaseController extends Controller
                     'processing_expires_at' => null,
                 ]);
             }
-            $order->update(['payment_status' => 'canceled']);
-            $order->delete();
+
+            $lockedOrder->update([
+                'payment_status' => 'canceled',
+                'canceled_at' => now(),
+                'reserved_until' => null,
+            ]);
+
+            $wasCanceled = true;
         });
 
-        return redirect()->route('items.index')->with('message', '購入をキャンセルしました。');
+        return $wasCanceled
+            ? redirect()->route('items.index')->with('message', '購入をキャンセルしました。')
+            : redirect()->route('items.index')->withErrors(['purchase' => '決済が完了しているためキャンセルできません。']);
     }
 
     public function success(Request $request, Item $item)
@@ -196,34 +213,52 @@ class PurchaseController extends Controller
         $sessionId = $request->query('session_id');
 
         if (! $sessionId) {
-            abort(400, 'session_id is required');
+            return redirect()->route('items.index')
+                ->withErrors(['purchase' => '決済情報が取得できませんでした。']);
         }
 
-        $order = Order::where('item_id', $item->id)
+        $order = Order::where('stripe_session_id', $sessionId)
             ->where('buyer_id', $user->id)
+            ->where('item_id', $item->id)
             ->firstOrFail();
 
-
-        if ($order->stripe_session_id !== $sessionId) {
-            abort(403);
+        if ($order->payment_status === 'paid') {
+            return redirect()->route('items.index')->with('message', '購入が完了しました。');
         }
 
-        Stripe::setApiKey(config('services.stripe.secret'));
-        $session = StripeSession::retrieve($sessionId);
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+        $session = \Stripe\Checkout\Session::retrieve($sessionId);
 
         if (($session->payment_status ?? null) === 'paid') {
-            DB::transaction(function () use ($item) {
-                $item->update([
-                    'status' => 'sold',
-                    'processing_expires_at' => null,
-                ]);
+            DB::transaction(function () use ($order, $item) {
+                $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+                $item  = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
+
+                if ($order->payment_status !== 'paid') {
+                    $order->update([
+                        'payment_status' => 'paid',
+                        'paid_at' => now(),
+                        'reserved_until' => null,
+                    ]);
+                }
+
+                if ($item->status !== 'sold') {
+                    $item->update([
+                        'status' => 'sold',
+                        'processing_expires_at' => null,
+                    ]);
+                }
             });
 
-            return redirect()->route('items.index')->with('message', '決済が完了しました。');
+            return redirect()->route('items.index')->with('message', '購入が完了しました。');
         }
 
-        return redirect()->route('items.index')->with('message', '決済を受け付けました。支払い完了の反映までお待ちください。');
+        return redirect()->route('items.index')->with(
+            'message',
+            '決済を受け付けました。お支払い完了後に購入が確定します。'
+        );
     }
+
 
     public function editAddress(Item $item, Request $request)
     {
