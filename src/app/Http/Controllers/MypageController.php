@@ -38,9 +38,9 @@ class MypageController extends Controller
             ->appends(['page' => 'sell']);
 
         return view('mypage.index', [
-            'mode' => 'sell',
+            'mode'   => 'sell',
             'orders' => null,
-            'items' => $items,
+            'items'  => $items,
         ]);
     }
 
@@ -53,5 +53,31 @@ class MypageController extends Controller
         }
     }
 
-    public function update(MypageRequest $request) {}
+    public function update(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name'        => ['required', 'string', 'max:255'],
+            'postal_code' => ['nullable', 'string', 'max:8'],
+            'address'     => ['nullable', 'string', 'max:255'],
+            'building'    => ['nullable', 'string', 'max:255'],
+            // 'image'     => ['nullable', 'image', 'max:2048'], // 後で
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+        ]);
+
+        $user->address()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'postal_code' => $validated['postal_code'] ?? null,
+                'address'     => $validated['address'] ?? null,
+                'building'    => $validated['building'] ?? null,
+            ]
+        );
+
+        return redirect()->route('mypage.profile')->with('message', 'プロフィールを更新しました。');
+    }
 }

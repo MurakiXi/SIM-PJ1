@@ -6,6 +6,7 @@
 /src/vendor
 /src/node_modules
 .env
+.env.testing
 .env.backup
 .phpunit.result.cache
 docker-compose.override.yml

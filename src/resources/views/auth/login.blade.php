@@ -14,7 +14,6 @@
 
 <form action="{{ route('login') }}" class="auth__login-form" method="post" novalidate>
     @csrf
-
     <div class="auth__login-group">
         <label class="auth__login-label" for="email">メールアドレス</label>
         <div class="auth__login-input">
