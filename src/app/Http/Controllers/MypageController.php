@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Item;
 use App\Models\Order;
-
+use App\Http\Requests\ProfileRequest;
 
 class MypageController extends Controller
 {
@@ -54,7 +54,7 @@ class MypageController extends Controller
         }
     }
 
-    public function update(Request $request)
+    public function update(ProfileRequest $request)
     {
         $user = $request->user();
 
@@ -71,8 +71,8 @@ class MypageController extends Controller
                 Storage::disk('public')->delete($user->profile_image);
             }
 
-            $path = $request->file('profile_image')->store('progiles', 'public');
-            $user->progile_image = $path;
+            $path = $request->file('profile_image')->store('profiles', 'public');
+            $user->profile_image = $path;
         }
 
         $user->name = $validated['name'];
