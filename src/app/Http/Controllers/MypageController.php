@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Item;
 use App\Models\Order;
 
@@ -58,16 +59,24 @@ class MypageController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name'        => ['required', 'string', 'max:20'],
             'postal_code' => ['nullable', 'string', 'max:8'],
             'address'     => ['nullable', 'string', 'max:255'],
             'building'    => ['nullable', 'string', 'max:255'],
-            // 'image'     => ['nullable', 'image', 'max:2048'], // 後で
+            'profile_image'     => ['nullable', 'image', 'mimes:jpeg,png', 'max:2048'],
         ]);
 
-        $user->update([
-            'name' => $validated['name'],
-        ]);
+        if ($request->hasFile('profile_image')) {
+            if (!empty($user->profile_image)) {
+                Storage::disk('public')->delete($user->profile_image);
+            }
+
+            $path = $request->file('profile_image')->store('progiles', 'public');
+            $user->progile_image = $path;
+        }
+
+        $user->name = $validated['name'];
+        $user->save();
 
         $user->address()->updateOrCreate(
             ['user_id' => $user->id],

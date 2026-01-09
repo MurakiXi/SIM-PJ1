@@ -6,17 +6,23 @@
     <h1>プロフィール設定</h1>
 </div>
 
-<div class="profile__header">
-    <img src="" alt="" class="profile__header-img">
-
-    <div class="profile__header-button">
-        <button type="button" class="profile__header-button-choice">画像を選択する</button>
-    </div>
-</div>
-
 <form action="{{ route('mypage.update') }}" class="profile__form" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PATCH')
+    <div class="profile__header">
+
+        @if(!empty($user->profile_image))
+        <img src="{{ asset('storage/' . $user->profile_image) }}" class="profile__header-image" alt="プロフィール画像">
+        @endif
+
+        <input id="profile_image" type="file" name="profile_image"
+            accept="image/jpeg,image/png" style="display:none;">
+
+        <label for="profile_image" class="profile__header-button-choice">
+            画像を選択する
+        </label>
+        @error('profile_image') <p class="form__error">{{ $message }}</p> @enderror
+    </div>
 
     <div class="profile__form-item">
         <label>ユーザー名</label>

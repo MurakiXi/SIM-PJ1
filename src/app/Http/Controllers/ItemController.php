@@ -118,7 +118,7 @@ class ItemController extends Controller
                 'description' => $validated['description'],
                 'price'       => $validated['price'],
                 'condition'   => $validated['condition'],
-                'image_path'   => $path,
+                'image_path'  => $path,
                 'status'      => 'on_sale',
             ]);
 
