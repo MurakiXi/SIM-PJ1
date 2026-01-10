@@ -10,6 +10,7 @@ use App\Models\Item;
 use App\Models\Like;
 use App\Models\Category;
 use App\Http\Requests\ExhibitionRequest;
+use App\Http\Requests\CommentRequest;
 use App\Models\Order;
 
 class ItemController extends Controller
@@ -151,6 +152,15 @@ class ItemController extends Controller
         }
 
         return back();
+    }
+
+    public function storeComment(CommentRequest $request, Item $item)
+    {
+        $item->comments()->create([
+            'user_id' => $request->user()->id,
+            'body' => $request->validated()['body'],
+        ]);
+        return back()->with('message', 'コメントを投稿しました。');
     }
 
     private function releaseExpiredReservations(): void

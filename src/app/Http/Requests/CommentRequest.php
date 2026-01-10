@@ -13,7 +13,7 @@ class CommentRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return auth()->check();
     }
 
     /**
@@ -25,6 +25,14 @@ class CommentRequest extends FormRequest
     {
         return [
             //
+            'body' => ['required', 'string', 'max:255'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'body' => 'コメント',
         ];
     }
 }

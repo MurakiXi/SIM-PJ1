@@ -13,6 +13,9 @@
     </div>
     <div class="show__data">
         <h1>{{ $item->name }}</h1>
+        @if(!empty($item->brand))
+        <div class="show__data-brand">{{$item->brand}}</div>
+        @endif
         @if($item->status === 'on_sale')
         <span class="show__data-price">¥{{ number_format($item->price) }}</span>
         <span class="show__data-price--p">(税込)</span>
@@ -32,7 +35,7 @@
                         <button type="submit" class="like-button">
                             <img class="show__data-fav"
                                 src="{{ $isLiked
-                                ? asset('assets/images/heart-red.png')
+                                ? asset('assets/images/heart-pink.png')
                                 : asset('assets/images/heart-blank.png') }}"
                                 alt="いいね">
                         </button>
@@ -60,9 +63,9 @@
         @else
         <div class="show__purchase-disabled">売約済み</div>
         @endif
-        <h2>商品説明</h2>
+        <div class="show__data-title">商品説明</div>
         <div class="show__description">{{ $item->description }}</div>
-        <h2>商品の情報</h2>
+        <div class="show__data-title">商品の情報</div>
         <table class="show__data-table">
             <tr class="show__data-row">
                 <th class="show__data-head">カテゴリー</th>
@@ -79,25 +82,24 @@
                 </td>
             </tr>
         </table>
-        <h2>コメント({{ $item->comments_count ?? 0 }})</h2>
+        <div class="show__data-title">コメント({{ $item->comments_count ?? 0 }})</div>
         @foreach($item->comments as $comment)
         <div class="show__comment">
             <div class="show__comment-user">{{ $comment->user->name }}</div>
             <div class="show__comment-body">{{ $comment->body }}</div>
         </div>
         @endforeach
+        @auth
+        <form action="{{ route('items.comment', $item) }}" class="show__comment-form" method="POST">
+            @csrf
+            <div class="show__comment-title">商品へのコメント</div>
+            <textarea name="body" class="show__comment-input">{{ old('body') }}</textarea>
+            @error('body') <p class="form__error">{{ $message }}</p> @enderror
+            <div class="show__comment-button">
+                <button class="show__comment-button-submit" type="submit">コメントを送信する</button>
+            </div>
+        </form>
+        @endauth
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-<hr>
-
 @endsection
