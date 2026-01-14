@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Item;
+namespace Tests\Feature\Items;
 
 use App\Models\Category;
 use App\Models\Item;
@@ -14,8 +14,8 @@ class ExhibitTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function sell_create_page_can_be_opened(): void
+    //ID15
+    public function test_sell_create_page_can_be_opened(): void
     {
         $user = User::factory()->create();
 
@@ -31,24 +31,24 @@ class ExhibitTest extends TestCase
         $res->assertSee('本');
     }
 
-    /** @test */
-    public function seller_can_store_item_and_categories_and_image(): void
+    //ID15
+    public function test_seller_can_store_item_and_categories_and_image(): void
     {
         Storage::fake('public');
 
         $seller = User::factory()->create();
 
-        // カテゴリはFactoryが無いので直に作成
+        //make category
         $cat1 = Category::create(['name' => '本']);
         $cat2 = Category::create(['name' => '家電']);
 
-        // GD無し環境でも落ちないファイル偽装（以前の件の回避策でございます）
+        //create png
         $file = UploadedFile::fake()->create('item.png', 10, 'image/png');
 
         $payload = [
             'image'        => $file,
             'category_ids' => [$cat1->id, $cat2->id],
-            'condition'    => 1, // 良好
+            'condition'    => 1,
             'name'         => 'テスト出品',
             'brand'        => 'テストブランド',
             'description'  => '説明文です',
@@ -57,9 +57,10 @@ class ExhibitTest extends TestCase
 
         $res = $this->actingAs($seller)->post(route('sell.store'), $payload);
 
-        // ItemController@store は items.index へリダイレクトの実装でございますね
+        //redirect to index
         $res->assertRedirect(route('items.index'));
 
+        //item exists on table
         $this->assertDatabaseHas('items', [
             'seller_id'   => $seller->id,
             'name'        => 'テスト出品',
@@ -72,11 +73,11 @@ class ExhibitTest extends TestCase
 
         $item = Item::where('seller_id', $seller->id)->where('name', 'テスト出品')->firstOrFail();
 
-        // 画像が保存されている（store('items','public') の戻り値 = image_path）
+        //image exists on storage
         $this->assertNotEmpty($item->image_path);
         Storage::disk('public')->assertExists($item->image_path);
 
-        // ピボット（category_item）が作られている
+        //category_item
         $this->assertDatabaseHas('category_item', [
             'item_id'     => $item->id,
             'category_id' => $cat1->id,

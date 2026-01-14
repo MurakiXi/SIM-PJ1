@@ -118,7 +118,7 @@ class LikeCommentTest extends TestCase
         ]);
     }
 
-    public function test_user_can_comment_item_and_count_increases(): void
+    public function test_user_can_comment_and_count_increases(): void
     {
         $user = User::factory()->create();
         $item = Item::factory()->create();
@@ -150,6 +150,7 @@ class LikeCommentTest extends TestCase
         $show->assertSee($user->name);
     }
 
+    //ID9-2
     public function test_guest_cannot_comment_item(): void
     {
         $item = Item::factory()->create();
@@ -174,6 +175,7 @@ class LikeCommentTest extends TestCase
         ]);
     }
 
+    //ID9-3
     public function test_comment_body_required(): void
     {
         $user = User::factory()->create();
@@ -188,6 +190,7 @@ class LikeCommentTest extends TestCase
         $response->assertSessionHasErrors(['body']);
     }
 
+    //ID9-4
     public function test_comment_body_max_255(): void
     {
         $user = User::factory()->create();

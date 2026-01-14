@@ -54,7 +54,8 @@ class CheckoutTest extends TestCase
         return [$seller, $item];
     }
 
-    public function test_id10_purchase_flow_marks_item_sold_and_shows_in_mypage_buy(): void
+    //ID10-1
+    public function test_purchase_flow(): void
     {
         $this->withoutExceptionHandling();
 
@@ -63,7 +64,7 @@ class CheckoutTest extends TestCase
         [$buyer, $address] = $this->makeBuyerWithAddress();
         [, $item] = $this->makeSellerAndItem();
 
-        // Stripe::Session::create をモック（外部通信を潰す）
+        // mock Stripe::Session::create (stop external communication)
         $sessionId = 'cs_test_123';
         $checkoutUrl = 'https://stripe.test/checkout/cs_test_123';
 
@@ -83,11 +84,10 @@ class CheckoutTest extends TestCase
                 'address_id' => $address->id,
             ]);
 
-        $response->assertSessionHasNoErrors(); // まずここで落ちるなら原因はバリデーション/購入不可
+        $response->assertSessionHasNoErrors();
         $response->assertRedirect($checkoutUrl);
 
-
-        // 注文が作られ、item が processing になっている（購入処理の中間成果）
+        //order exists on table
         $this->assertDatabaseHas('orders', [
             'item_id' => $item->id,
             'buyer_id' => $buyer->id,
@@ -99,12 +99,13 @@ class CheckoutTest extends TestCase
             'ship_building' => $address->building,
         ]);
 
+        //status turns into 'processing'
         $this->assertDatabaseHas('items', [
             'id' => $item->id,
             'status' => 'processing',
         ]);
 
-        // 2) success（Stripeから戻った想定）で「paid」にする
+        //payment status turns into 'paid'
         $stripeSession
             ->shouldReceive('retrieve')
             ->once()
@@ -132,18 +133,21 @@ class CheckoutTest extends TestCase
             'status' => 'sold',
         ]);
 
-        // 3) 商品一覧で Sold が出る（要件の見える化）
+        //ID10-2
+        //purchase status turns into 'Sold' 
         $index = $this->get(route('items.index'));
         $index->assertOk();
         $index->assertSee($item->name);
         $index->assertSee('Sold');
 
-        // 4) マイページ購入一覧に載る
+        //ID10-3
+        //item can be seen on bought list
         $mypage = $this->actingAs($buyer)->get(route('mypage', ['page' => 'buy']));
         $mypage->assertOk();
         $mypage->assertSee($item->name);
     }
 
+    //ID11
     public function test_id11_payment_preview_elements_exist_on_purchase_page(): void
     {
         [$buyer, $address] = $this->makeBuyerWithAddress();
@@ -152,22 +156,22 @@ class CheckoutTest extends TestCase
         $res = $this->actingAs($buyer)->get(route('purchase.show', $item));
         $res->assertOk();
 
-        // PHPUnitではJSの「変更反映」自体は再現しづらいので、
-        // 反映の仕掛け（select/preview/script）が存在することを担保する
+        //select/preview/script exists
         $res->assertSee('id="payment_method"', false);
         $res->assertSee('id="payment_method_preview"', false);
         $res->assertSee('payment-select.js', false);
 
-        // プルダウンの選択肢があること
+        //choices exists in pulldown
         $res->assertSee('コンビニ払い');
         $res->assertSee('カード支払い');
 
-        // hidden の address_id が入っていること（住所初期値）
+        //address_id exists
         $res->assertSee('name="address_id"', false);
         $res->assertSee('value="' . $address->id . '"', false);
     }
 
-    public function test_id12_updated_address_is_reflected_and_used_in_order_shipping_fields(): void
+    //ID12
+    public function test_updated_address_is_reflected_and_used_in_order_shipping_fields(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-01-13 12:00:00'));
 
@@ -178,7 +182,7 @@ class CheckoutTest extends TestCase
         ]);
         [, $item] = $this->makeSellerAndItem();
 
-        // 1) 住所変更
+        //change address
         $update = $this->actingAs($buyer)->patch(route('purchase.address.update', $item), [
             'postal_code' => '222-2222',
             'address' => '東京都新宿区2-2-2',
@@ -190,7 +194,8 @@ class CheckoutTest extends TestCase
 
         $buyer = $buyer->fresh();
 
-        // 2) 購入画面に反映されている
+        //ID12-1
+        //new address reflected on puchase view
         $show = $this->actingAs($buyer)->get(route('purchase.show', $item));
         $show->assertOk();
         $show->assertSee('〒222-2222');
@@ -199,7 +204,8 @@ class CheckoutTest extends TestCase
 
         $newAddress = $buyer->fresh()->address;
 
-        // 3) その住所で購入 → orders.ship_* に入る
+        //ID12-2
+        //new address reflected on orders.ship
         $sessionId = 'cs_test_456';
         $checkoutUrl = 'https://stripe.test/checkout/cs_test_456';
 
