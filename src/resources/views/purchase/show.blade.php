@@ -1,5 +1,8 @@
 @extends('layouts.app')
-
+@php
+$selectedPayment = old('payment_method', '');
+$paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選択してください';
+@endphp
 
 @section('title', '購入')
 
@@ -25,11 +28,14 @@
             </div>
             <div class="purchase__data-payment">
                 <div class="purchase__data-title">支払い方法</div>
-                <select id="payment_method" name="payment_method" class="purchase__data-payment-select" required>
-                    <option value="">選択してください</option>
-                    <option value="convenience_store">コンビニ払い</option>
-                    <option value="card">カード支払い</option>
+                <select id="payment_method" name="payment_method" required>
+                    @foreach($paymentMethods as $value => $label)
+                    <option value="{{ $value }}" {{ $selectedPayment === $value ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                    @endforeach
                 </select>
+                <span id="payment_method_preview">{{ $paymentLabel }}</span>
                 @error('payment_method')
                 <p class="error">{{ $message }}</p>
                 @enderror

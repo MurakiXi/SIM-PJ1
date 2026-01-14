@@ -17,7 +17,6 @@ class Order extends Model
         'ship_postal_code',
         'ship_address',
         'ship_building',
-
         'price_at_purchase',
         'payment_status',
         'reserved_until',

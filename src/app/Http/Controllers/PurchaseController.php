@@ -84,7 +84,7 @@ class PurchaseController extends Controller
                 'processing_expires_at' => $reservedUntil,
             ]);
 
-            return Order::create([
+            $order = new Order([
                 'item_id'           => $lockedItem->id,
                 'buyer_id'          => $user->id,
                 'payment_method'    => $paymentMethod,
@@ -94,8 +94,14 @@ class PurchaseController extends Controller
                 'ship_building'     => $address->building,
                 'price_at_purchase' => $lockedItem->price,
                 'payment_status'    => 'pending',
-                'reserved_until'    => $reservedUntil,
             ]);
+
+
+            $order->reserved_until = $reservedUntil;
+
+            $order->save();
+
+            return $order;
         });
 
         try {
@@ -146,8 +152,6 @@ class PurchaseController extends Controller
             throw $e;
         }
     }
-
-
 
     public function cancel(Request $request, Item $item)
     {
@@ -238,7 +242,6 @@ class PurchaseController extends Controller
                     $order->update([
                         'payment_status' => 'paid',
                         'paid_at' => now(),
-                        'reserved_until' => null,
                     ]);
                 }
 
@@ -259,7 +262,6 @@ class PurchaseController extends Controller
         );
     }
 
-
     public function editAddress(Item $item, Request $request)
     {
         $address = $request->user()->address;
@@ -271,14 +273,11 @@ class PurchaseController extends Controller
     {
         $user = $request->user();
 
-        Address::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'postal_code' => $request->validated()['postal_code'],
-                'address'     => $request->validated()['address'],
-                'building'    => $request->validated()['building'] ?? null,
-            ]
-        );
+        $user->address()->updateOrCreate([], [
+            'postal_code' => $request->validated()['postal_code'],
+            'address'     => $request->validated()['address'],
+            'building'    => $request->validated()['building'] ?? null,
+        ]);
 
         return redirect()->route('purchase.show', $item);
     }

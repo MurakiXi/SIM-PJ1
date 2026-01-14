@@ -1,11 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-<h1>マイページ</h1>
-
+<div class="mypage__profile">
+    @if(!empty($user->profile_image))
+    <img src="{{ asset('storage/' . $user->profile_image) }}" alt="プロフィール画像">
+    @endif
+    <p>{{ $user->name }}</p>
+    <a href="{{ route('mypage.profile') }}">プロフィールを編集</a>
+</div>
 <div style="margin: 16px 0;">
     <a href="{{ route('mypage', ['page' => 'sell']) }}">出品した商品</a>
-    |
+
     <a href="{{ route('mypage', ['page' => 'buy']) }}">購入した商品</a>
 </div>
 

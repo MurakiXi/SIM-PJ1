@@ -23,23 +23,6 @@ class CreateNewUser implements CreatesNewUsers
             'name' => ['required', 'string', 'max:20'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ], [
-
-            'name.required' => 'お名前を入力してください',
-            'name.max' => 'お名前は20文字以内で入力してください',
-
-            'email.required' => 'メールアドレスを入力してください',
-            'email.email' => 'メールアドレスの形式が正しくありません',
-            'email.unique' => 'このメールアドレスは既に登録されています',
-
-            'password.required' => 'パスワードを入力してください',
-            'password.min' => 'パスワードは8文字以上で入力してください',
-            'password.confirmed' => 'パスワードが一致しません',
-        ], [
-            'name' => 'お名前',
-            'email' => 'メールアドレス',
-            'password' => 'パスワード',
-            'password_confirmation' => 'パスワード（確認）',
         ])->validate();
 
         return User::create([

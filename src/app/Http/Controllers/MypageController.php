@@ -29,6 +29,7 @@ class MypageController extends Controller
                 'mode' => $mode,
                 'orders' => $orders,
                 'items' => null,
+                'user' => $user,
             ]);
         }
 
@@ -39,6 +40,7 @@ class MypageController extends Controller
             ->appends(['page' => 'sell']);
 
         return view('mypage.index', [
+            'user' => $user,
             'mode'   => 'sell',
             'orders' => null,
             'items'  => $items,
@@ -46,12 +48,11 @@ class MypageController extends Controller
     }
 
     public function edit(Request $request)
-    { {
-            $user = $request->user();
-            $address = $user->address;
+    {
+        $user = $request->user();
+        $address = $user->address;
 
-            return view('mypage.profile', compact('user', 'address'));
-        }
+        return view('mypage.profile', compact('user', 'address'));
     }
 
     public function update(ProfileRequest $request)
