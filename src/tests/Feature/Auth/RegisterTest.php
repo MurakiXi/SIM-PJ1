@@ -124,7 +124,7 @@ class RegisterTest extends TestCase
 
         $this->assertGuest();
     }
-    
+
     // ID1-5
     public function test_register_password_confirmation_mismatch(): void
     {
@@ -153,7 +153,7 @@ class RegisterTest extends TestCase
     }
 
     //ID1-6
-    public function test_register_success_redirects_to_profile_page(): void
+    public function test_register_success_redirects_to_verify_page(): void
     {
         $payload = $this->validRegisterPayload();
 
@@ -161,7 +161,7 @@ class RegisterTest extends TestCase
             ->withSession(['_token' => $payload['_token']])
             ->post('/register', $payload);
 
-        $response->assertRedirect('/mypage/profile');
+        $response->assertRedirect('/email/verify');
 
         $this->assertAuthenticated();
 

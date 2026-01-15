@@ -19,6 +19,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Http\Responses\RegisterResponse;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use App\Http\Responses\LoginResponse;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use App\Http\Responses\VerifyEmailResponse;
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 
 
 class FortifyServiceProvider extends ServiceProvider
@@ -30,6 +34,8 @@ class FortifyServiceProvider extends ServiceProvider
     {
         //
         $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
+        $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
+        $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);
     }
 
     /**
@@ -45,6 +51,12 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::loginView(function () {
             return view('auth.login');
         });
+
+        Fortify::verifyEmailView(
+            function () {
+                return view('auth.verify');
+            }
+        );
 
         Fortify::authenticateUsing(function (Request $request) {
 

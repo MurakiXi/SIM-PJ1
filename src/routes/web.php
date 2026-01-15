@@ -27,7 +27,7 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
     ->name('stripe.webhook');
 
 //PG06,07,08,09,10
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
 
     // PG06
     Route::get('/purchase/{item}', [PurchaseController::class, 'purchase'])->name('purchase.show');
