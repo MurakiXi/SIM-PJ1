@@ -9,10 +9,12 @@
 
 <div class="show__body">
     <div class="show-image">
-        <img src="{{ $item->image_path ? asset('storage/'.$item->image_path) : '' }}" alt="{{ $item->name }}">
+        <img class="show-image__img" src="{{ $item->image_path ? asset('storage/'.$item->image_path) : '' }}" alt="{{ $item->name }}">
     </div>
     <div class="show__data">
-        <h1>{{ $item->name }}</h1>
+        <div class="show__data-name">
+            {{ $item->name }}
+        </div>
         @if(!empty($item->brand))
         <div class="show__data-brand">{{$item->brand}}</div>
         @endif
@@ -20,7 +22,7 @@
         <span class="show__data-price">¥{{ number_format($item->price) }}</span>
         <span class="show__data-price--p">(税込)</span>
         @elseif($item->status === 'processing')
-        <div class="show__data-processing">Processing</div>
+        <div class="show__data-price">Processing</div>
         @elseif($item->status === 'sold')
         <div class="show__data-sold">Sold</div>
         @else
@@ -44,12 +46,10 @@
                     <img class="show__data-fav" src="{{ asset('assets/images/heart-blank.png') }}" alt="いいね">
                     @endauth
                 </th>
-
                 <th class="show__table-item">
                     <img class="show__data-fav" src="{{ asset('assets/images/comment.png') }}" alt="コメント">
                 </th>
             </tr>
-
             <tr class="show__table-row">
                 <th class="show__table-item">{{ $item->likes_count ?? 0 }}</th>
                 <th class="show__table-item">{{ $item->comments_count ?? 0 }}</th>
@@ -57,12 +57,14 @@
         </table>
 
         @if($item->status === 'on_sale')
-        <a href="{{ route('purchase.show', $item) }}" class="show__purchase">購入手続きへ</a>
-        @elseif($item->status === 'processing')
-        <div class="show__purchase-disabled">購入手続き中</div>
-        @else
-        <div class="show__purchase-disabled">売約済み</div>
-        @endif
+        <div class="show__purchase-button">
+            <a href="{{ route('purchase.show', $item) }}" class="show__purchase">購入手続きへ</a>
+            @elseif($item->status === 'processing')
+            <div class="show__purchase-disabled">購入手続き中</div>
+            @else
+            <div class="show__purchase-disabled">売約済み</div>
+            @endif
+        </div>
         <div class="show__data-title">商品説明</div>
         <div class="show__description">{{ $item->description }}</div>
         <div class="show__data-title">商品の情報</div>
@@ -70,14 +72,14 @@
             <tr class="show__data-row">
                 <th class="show__data-head">カテゴリー</th>
                 @foreach($item->categories as $category)
-                <td class="show__data-item">
+                <td class="show__data-item-category">
                     {{ $category->name }}
                 </td>
                 @endforeach
             </tr>
             <tr class="show__data-table">
                 <th class="show__data-head">商品の状態</th>
-                <td class="show__data-item">
+                <td class="show__data-item-condition">
                     {{ $item->condition?->label() }}
                 </td>
             </tr>
@@ -85,7 +87,18 @@
         <div class="show__data-title">コメント({{ $item->comments_count ?? 0 }})</div>
         @foreach($item->comments as $comment)
         <div class="show__comment">
-            <div class="show__comment-user">{{ $comment->user->name }}</div>
+            <div class="show__comment-profile">
+                <div class="comment__image">
+                    @if(!empty($comment->user->profile_image))
+                    <img src="{{ asset('storage/' . $comment->user->profile_image) }}" alt="" class="comment__image-img">
+                    @else
+                    <div class="comment__image-blank" aria-hidden="true"></div>
+                    @endif
+                </div>
+                <div class="show__comment-name">
+                    <div class="show__comment-user">{{ $comment->user->name }}</div>
+                </div>
+            </div>
             <div class="show__comment-body">{{ $comment->body }}</div>
         </div>
         @endforeach

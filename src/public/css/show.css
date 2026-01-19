@@ -1,6 +1,159 @@
+.show__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.show-image {
+    grid-row: 1/2;
+    width: 100%;
+}
+
+.show-image__img {
+    width: 70%;
+    margin: 100px auto;
+    display: block;
+}
+
+.show__data {
+    margin-top: 70px;
+    width: 80%;
+}
+
+.show__data-name {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.show__data-price {
+    font-size: 30px;
+}
+
+.show__data-sold {
+    font-size: 30px;
+    color: red;
+}
+
+.show__data-unknown {
+    font-size: 30px;
+}
+
+.show__table {
+    width: 20%;
+    margin: 10px;
+}
+
 .like-button {
     background: transparent;
     border: none;
     padding: 0;
     cursor: pointer;
+}
+
+.show__purchase-button {
+    width: 100%;
+    background: red;
+    height: 40px;
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.show__purchase {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.show__data-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px auto;
+}
+
+.show__data-head {
+    font-weight: bold;
+    font-size: 18px;
+    width: 150px;
+    text-align: left;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+.show__data-item-category {
+    font-size: 14px;
+    background: #ccc;
+    border-radius: 20px;
+    text-align: center;
+    padding: 0 20px;
+    display: inline-block;
+    margin: 0 15px;
+}
+
+.show__data-item-condition {
+    font-size: 14px;
+    text-align: center;
+    padding: 0 20px;
+    display: inline-block;
+    margin: 0 10px;
+}
+
+.show__comment-profile {
+    display: flex;
+}
+
+.comment__image-img,
+.comment__image-blank {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.comment__image-img {
+    object-fit: cover;
+    display: block;
+}
+
+.comment__image-blank {
+    background: #d9d9d9;
+}
+
+.comment__image {
+    width: 65px;
+}
+
+.show__comment-name {
+    margin: auto 0;
+    font-weight: bold;
+}
+
+.show__comment-body {
+    width: 100%;
+    background: #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px auto;
+}
+
+.show__comment-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.show__comment-input {
+    border-radius: 5px;
+    width: 100%;
+    min-height: 150px;
+}
+
+.show__comment-button-submit {
+    border: none;
+    width: 100%;
+    background: red;
+    color: white;
+    margin: 20px 0;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px 0;
+    border-radius: 5px;
 }

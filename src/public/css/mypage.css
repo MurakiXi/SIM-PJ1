@@ -1,0 +1,106 @@
+.mypage__profile {
+    display: flex;
+    justify-content: space-between;
+    margin: 50px auto;
+    width: 50%;
+}
+
+.mypage__header-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.mypage__header-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.mypage__header-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #ddd;
+    border-radius: 50%;
+}
+
+.mypage__profile-name {
+    font-size: 24px;
+    font-weight: bold;
+    width: 150px;
+    margin: 25px auto;
+}
+
+.mypage__edit-profile {
+    margin: auto 50px;
+    color: red;
+    border: 1px solid red;
+    border-radius: 5px;
+    height: 40px;
+    padding: 5px 30px;
+}
+
+.profile__tab {
+    display: flex;
+    justify-content: left;
+    height: 80px;
+    border-bottom: 2px solid #000;
+    align-items: end;
+    text-decoration: none;
+}
+
+.profile__tab-link {
+    display: inline-block;
+    margin: 0 45px 10px 90px;
+    font-weight: 700;
+    color: #666;
+    text-decoration: none;
+}
+
+.profile__tab-link.is-active {
+    color: red;
+}
+
+.profile__tab-exhibit a,
+.profile__tab-purchase a {
+    text-decoration: none;
+    color: inherit;
+    font-weight: bold
+}
+
+.profile__list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.profile__list-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 5px 0;
+    text-decoration: none;
+    color: inherit;
+    font-weight: bold
+}
+
+.profile__list-card {
+    margin: 50px 2% auto;
+    width: 20%;
+}
+
+.profile__list-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #eee;
+}
+
+.profile__list-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}

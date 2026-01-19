@@ -1,0 +1,164 @@
+.purchase__button {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 40px;
+    align-items: start;
+}
+
+.purchase__grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.purchase__data {
+    grid-column: 1/2;
+    margin-top: 50px;
+}
+
+.purchase__payment {
+    grid-column: 2/3;
+}
+
+.purchase__data-item {
+    display: flex;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #000;
+}
+
+.purchase__data-image {
+    width: 200px;
+    aspect-ratio: 1 / 1;
+    background: #ccc;
+    overflow: hidden;
+}
+
+.purchase__data-image-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.purchase__data-title {
+    margin-left: 25px;
+    vertical-align: top;
+}
+
+.purchase__data-name {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.purchase__data-price {
+    font-size: 32px;
+}
+
+.payment-method {
+    width: 250px;
+    font-size: 14px;
+    margin-left: 100px;
+    border-radius: 3px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
+    padding: 5px;
+}
+
+.payment-method::-ms-expand {
+    display: none;
+}
+
+.payment-method-choice {
+    background: #555;
+    color: #fff;
+}
+
+.purchase__data-label {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 30px 50px;
+}
+
+.payment-method-wrap {
+    position: relative;
+    display: inline-block;
+    width: 345px;
+}
+
+.payment-method-wrap::after {
+    content: "▼";
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 14px;
+}
+
+.purchase__data-payment {
+    border-bottom: 1px solid #000;
+    width: 100%;
+    padding-bottom: 60px;
+}
+
+.purchase__data-address {
+    border-bottom: 1px solid #000;
+    width: 100%;
+    padding-bottom: 60px;
+}
+
+.purchase__data-address-head {
+    display: flex;
+    justify-content: space-between;
+}
+
+.purchase__address-change {
+    text-decoration: none;
+    margin: 30px;
+    font-size: 18px;
+    color: #3580d5;
+}
+
+.purchase__data-address-content {
+    font-weight: bold;
+    font-size: 20px;
+    margin-left: 100px;
+}
+
+
+.purchase__payment {
+    margin-top: 50px;
+}
+
+.purchase__list {
+    width: 100%;
+    border: 1px solid #000;
+    font-size: 18px;
+}
+
+.purchase__list-row {
+    border-bottom: 1px solid #000;
+
+}
+
+.purchase__list-item {
+    padding: 35px 0;
+    font-weight: bold;
+    text-align: center;
+}
+
+.purchase__button-submit {
+    border: none;
+    background: red;
+    color: white;
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 3px;
+    margin-top: 50px;
+}

@@ -9,17 +9,22 @@
 
 @section('content')
 @php
-$tab = request('tab'); // null or 'mylist'
+$tab = request('tab', 'recommend');
+$keyword = request('keyword');
 @endphp
 
 <div class="list__head">
     <div class="list__head-recommend">
-        <a href="{{ route('items.index', array_filter(['keyword' => request('keyword')])) }}">おすすめ</a>
+        <a href="{{ route('items.index', array_filter(['keyword' => $keyword])) }}"
+            class="list__head-link {{ $tab !== 'mylist' ? 'is-active' : '' }}"
+            aria-current="{{ $tab !== 'mylist' ? 'page' : 'false' }}">おすすめ</a>
     </div>
     <div class="list__head-mylist">
-        <a href="{{ route('items.index', array_filter(['tab' => 'mylist', 'keyword' => request('keyword')])) }}">マイリスト</a>
+        <a href="{{ route('items.index', array_filter(['tab' => 'mylist', 'keyword' => $keyword])) }}" class="list__head-link {{ $tab === 'mylist' ? 'is-active' : '' }}"
+            aria-current="{{ $tab === 'mylist' ? 'page' : 'false' }}">マイリスト</a>
     </div>
 </div>
+
 @guest
 @if($tab === 'mylist')
 <p>（未認証のため表示できません）</p>
@@ -33,13 +38,15 @@ $tab = request('tab'); // null or 'mylist'
         <div class="list__card-image">
             <img src="{{ $item->image_path ? asset('storage/'.$item->image_path) : '' }}" alt="{{ $item->name }}">
         </div>
-        <a class="list__card-name" href="{{ route('items.show', $item) }}">{{ $item->name }}</a>
-        @if($item->status === 'sold')
-        <div class="list__inner-sold">Sold</div>
-        @elseif($item->status === 'processing')
-        <div class="list__inner-processing">Processing</div>
-        @endif
+        <div class="list__card-name">
+            <a class="list__card-name" href="{{ route('items.show', $item) }}">{{ $item->name }}</a>
 
+            @if($item->status === 'sold')
+            <div class="list__inner-sold">Sold</div>
+            @elseif($item->status === 'processing')
+            <div class="list__inner-processing">Processing</div>
+            @endif
+        </div>
 
     </div>
 

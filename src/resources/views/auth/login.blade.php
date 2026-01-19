@@ -3,7 +3,7 @@
 @section('title', 'ログイン')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+<link rel="stylesheet" href="{{ asset('css/login.css') }}">
 @endsection
 
 @section('content')
@@ -14,29 +14,26 @@
 
 <form action="{{ route('login') }}" class="auth__login-form" method="post" novalidate>
     @csrf
-    <div class="auth__login-group">
+    <div class="auth__login-inner">
         <label class="auth__login-label" for="email">メールアドレス</label>
-        <div class="auth__login-input">
-            <input id="email" type="email" name="email" value="{{ old('email') }}">
+        <div class="auth__login-item">
+            <input class="auth__login-input" id="email" type="email" name="email" value="{{ old('email') }}">
         </div>
         @error('email')
         <p class="auth__error">{{ $message }}</p>
         @enderror
-    </div>
-    <div class="auth__login-group">
         <label class="auth__login-label" for="password">パスワード</label>
-        <div class="auth__login-input">
-            <input id="password" type="password" name="password">
+        <div class="auth__login-item">
+            <input class="auth__login-input" id="password" type="password" name="password">
         </div>
         @error('password')
         <p class="auth__error">{{ $message }}</p>
         @enderror
-    </div>
-
-    <div class="auth__login-button">
-        <button class="auth__login-button-submit" type="submit">
-            ログインする
-        </button>
+        <div class="auth__login-button">
+            <button class="auth__login-button-submit" type="submit">
+                ログインする
+            </button>
+        </div>
     </div>
 </form>
 

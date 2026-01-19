@@ -2,6 +2,10 @@
 
 @section('title','メール認証')
 
+@section('css')
+<link rel="stylesheet" href="{{ asset('css/verify.css') }}">
+@endsection
+
 @section('content')
 <div class="verify__inner">
     <div class="verify__message">
@@ -17,7 +21,7 @@
 
     <form method="POST" action="{{ route('verification.send') }}" class="verify__resend-form">
         @csrf
-        <button type="submit" class="verify__resend-link">認証メールを再送する</button>
+        <button type="submit" class="verify__resend-mail">認証メールを再送する</button>
     </form>
 </div>
 @endsection

@@ -12,19 +12,19 @@
 
 <body>
     <header class="header">
-        <div class="header__inner">
-            <div class="header__logo">
-                <a href="{{ route('items.index') }}">
-                    <img src="{{ asset('assets/images/coachtech-header-logo.png') }}" alt="COACHTECHフリマ">
-                </a>
-            </div>
+        <div class="header__logo">
+            <a href="{{ route('items.index') }}">
+                <img src="{{ asset('assets/images/coachtech-header-logo.png') }}" alt="COACHTECHフリマ">
+            </a>
         </div>
+        @if(Route::is('login') || Route::is('register') || Route::is('verification.*'))
+        @else
         <div class="header__form">
             <form class="header__form-inner" action="{{ route('items.index') }}" method="GET">
                 @if(request('tab')==='mylist')
                 <input type="hidden" name="tab" value="mylist">
                 @endif
-                <input class="header__form-input" type="text" name="keyword" value="{{ request('keyword') }}" placeholder="なにをお探しですか？">
+                <input id="q" type="search" name="keyword" value="{{ request('keyword') }}" placeholder="なにをお探しですか？" class="header__form-input" enterkeyhint="search">
                 <button class="header__form-submit" type="submit">検索</button>
             </form>
         </div>
@@ -33,7 +33,7 @@
             <a class="header__nav-item" href="{{ route('login') }}">
                 ログイン
             </a>
-            <a class="header__nav-item" href="{{ route('register') }}">
+            <a class="header__nav-item" href="{{ route('mypage') }}">
                 マイページ
             </a>
             <a class="header__nav-item-sell" href="{{ route('sell.create') }}">
@@ -43,25 +43,20 @@
         @endguest
 
         @auth
-        <div class="header__nav">
-            <div class="header-nav__item">
-                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit">ログアウト</button>
-                </form>
-            </div>
-            <a href="{{ route('mypage') }}">
-                <div class="header-nav__item">
-                    マイページ
-                </div>
+        <div class="header__nav-inner">
+            <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                @csrf
+                <button class="header__nav-logout" type="submit">ログアウト</button>
+            </form>
+            <a class="header__nav-item" href="{{ route('mypage') }}">
+                マイページ
             </a>
-            <a href="{{ route('sell.create') }}">
-                <div class="header-nav__item-sell">
-                    出品
-                </div>
+            <a class="header__nav-item-sell" href="{{ route('sell.create') }}">
+                出品
             </a>
         </div>
         @endauth
+        @endif
     </header>
 
     <main>

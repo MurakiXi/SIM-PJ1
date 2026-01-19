@@ -20,22 +20,26 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
         @endif
         <div class="purchase__data">
             <div class="purchase__data-item">
-                <div class="purchase-data-image">
-                    <img src="{{ $item->image_path ? asset('storage/'.$item->image_path) : '' }}" alt="{{ $item->name }}">
+                <div class="purchase__data-image">
+                    <img class="purchase__data-image-img" src="{{ $item->image_path ? asset('storage/'.$item->image_path) : '' }}" alt="{{ $item->name }}">
                 </div>
-                <h2>{{ $item->name }}</h2>
-                <div class="show__data-price">¥{{ number_format($item->price) }}</div>
+                <div class="purchase__data-title">
+                    <div class="purchase__data-name">{{ $item->name }}</div>
+                    <div class="purchase__data-price">¥{{ number_format($item->price) }}</div>
+                </div>
             </div>
             <div class="purchase__data-payment">
-                <div class="purchase__data-title">支払い方法</div>
-                <select id="payment_method" name="payment_method" required>
-                    @foreach($paymentMethods as $value => $label)
-                    <option value="{{ $value }}" {{ $selectedPayment === $value ? 'selected' : '' }}>
-                        {{ $label }}
-                    </option>
-                    @endforeach
-                </select>
-                <span id="payment_method_preview">{{ $paymentLabel }}</span>
+                <div class="purchase__data-label">支払い方法</div>
+
+                <div class="payment-method-wrap">
+                    <select class="payment-method" id="payment_method" name="payment_method" required>
+                        <option value="" disabled hidden {{ $selectedPayment ? '' : 'selected' }}>選択してください</option>
+                        @foreach($paymentMethods as $value => $label)
+                        <option class="payment-method-choice" value="{{ $value }}" {{ $selectedPayment === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 @error('payment_method')
                 <p class="error">{{ $message }}</p>
                 @enderror
@@ -47,12 +51,12 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
                 @error('purchase')
                 <p class="error">{{ $message }}</p>
                 @enderror
-
             </div>
+
             <div class="purchase__data-address">
                 <div class="purchase__data-address-head">
-                    <div class="purchase__data-title">配送先</div>
-                    <a href="{{ route('purchase.address.edit', $item) }}" class="purchase__data-change">変更する</a>
+                    <div class="purchase__data-label">配送先</div>
+                    <a class="purchase__address-change" href="{{ route('purchase.address.edit', $item) }}" class="purchase__data-change">変更する</a>
                 </div>
                 <div class="purchase__data-address-content">
                     @if($address)
@@ -66,8 +70,8 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
 
             </div>
         </div>
-        <div class="purchase__payment">
 
+        <div class="purchase__payment">
             <table class="purchase__list">
                 <tr class="purchase__list-row">
                     <th class="purchase__list-head">
@@ -82,7 +86,7 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
                         支払い方法
                     </th>
                     <td class="purchase__list-item">
-                        <span id="payment_method_preview">選択してください</span>
+                        <span id="payment_method_preview" class="payment_method_preview">選択してください</span>
                     </td>
                 </tr>
             </table>
@@ -95,7 +99,6 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
                 購入する
             </button>
             @endif
-
         </div>
     </form>
 </div>

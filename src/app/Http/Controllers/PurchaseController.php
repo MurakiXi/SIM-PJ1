@@ -36,7 +36,6 @@ class PurchaseController extends Controller
         $address = $user->address;
 
         $paymentMethods = [
-            '' => '選択してください',
             'convenience_store' => 'コンビニ払い',
             'card' => 'カード支払い',
         ];

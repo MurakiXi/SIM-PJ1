@@ -1,0 +1,62 @@
+.auth__register-title {
+    margin-top: 60px;
+    text-align: center
+}
+
+.auth__register-form {
+    width: 50%;
+    margin: 25px auto;
+}
+
+.auth__register-inner {
+    width: 80%;
+    margin: 25px auto;
+}
+
+.auth__register-item {
+    width: 100%;
+    margin: 3px 0 20px 0;
+}
+
+.auth__register-input {
+    width: 100%;
+    height: 40px;
+    border-radius: 3px;
+    border: 1px solid #888;
+}
+
+.auth__register-label {
+    font-weight: bold;
+    margin: 3px;
+}
+
+.auth__register-button {
+    width: 100%;
+    margin-top: 80px;
+}
+
+.auth__register-button-submit {
+    width: 100%;
+    color: #fff;
+    background: red;
+    height: 40px;
+    border-radius: 3px;
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.auth__register-login a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.auth__register-login {
+    color: blue;
+    text-align: center;
+}
+
+.auth__error {
+    color: red;
+    font-weight: bold;
+}

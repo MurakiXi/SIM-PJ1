@@ -1,0 +1,33 @@
+.edit-address__inner {
+    width: 50%;
+    margin: 25px auto;
+}
+
+.edit-address__header {
+    text-align: center;
+}
+
+.edit-address__form-label {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.edit-address__form-input {
+    height: 40px;
+    width: 100%;
+    border-radius: 3px;
+    border: 1px solid #000;
+    padding-left: 10px;
+}
+
+.edit-address__button-submit {
+    background: red;
+    color: white;
+    width: 100%;
+    border-radius: 5px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    padding: 10px;
+}
