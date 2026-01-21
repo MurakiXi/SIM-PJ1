@@ -9,61 +9,64 @@ use App\Models\Like;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Symfony\Component\DomCrawler\Crawler;
 
 class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
     // ID7-1:
-    public function test_show_displays_basic_information_for_guest(): void
+    public function test_show_displays_like_and_comment_info(): void
     {
-        //testcategory
         $category = Category::create(['name' => '家電']);
 
-        //testitem
         $item = Item::factory()->create([
             'name'        => 'テスト商品',
             'brand'       => 'Rolax',
             'price'       => 15000,
-            'description' => '説明文です',
-            'condition'   => 1,
+            'description' => '説明文',
             'status'      => 'on_sale',
+            'condition'   => 1,
             'image_path'  => 'items/dummy.jpg',
         ]);
 
-        //make pivot
         $item->categories()->attach($category->id);
 
-        //get
-        $response = $this->get("/item/{$item->id}");
+        $liker1 = User::factory()->create(['name' => '太郎']);
+        $liker2 = User::factory()->create(['name' => '次郎']);
 
-        //200
+        Like::create(['user_id' => $liker1->id, 'item_id' => $item->id]);
+        Like::create(['user_id' => $liker2->id, 'item_id' => $item->id]);
+
+        $commenter1 = User::factory()->create(['name' => '一郎']);
+        $commenter2 = User::factory()->create(['name' => '二郎']);
+
+        Comment::create(['user_id' => $commenter1->id, 'item_id' => $item->id, 'body' => 'めっちゃ欲しい']);
+        Comment::create(['user_id' => $commenter2->id, 'item_id' => $item->id, 'body' => 'これは安い']);
+
+        $response = $this->get("/item/{$item->id}");
         $response->assertOk();
 
-        //can see name and brand
+        // 基本情報
         $response->assertSeeText('テスト商品');
         $response->assertSeeText('Rolax');
-
-        //can see price
         $response->assertSeeText('¥15,000');
-
-        //can see image
         $response->assertSee('storage/items/dummy.jpg', false);
-
-        //can see description
-        $response->assertSeeText('説明文です');
-
-        //can see category
+        $response->assertSeeText('説明文');
         $response->assertSeeText('家電');
-
-        //can see status
         $response->assertSeeText('良好');
-
-        //can see 'purchase'
         $response->assertSeeText('購入手続きへ');
 
-        //number of like and comment are '0'
-        $response->assertSeeText('0');
+        $response->assertSeeTextInOrder(['一郎', 'めっちゃ欲しい']);
+        $response->assertSeeTextInOrder(['二郎', 'これは安い']);
+
+        $response->assertSeeText('コメント(2)');
+
+        // いいね数
+        $html = $response->getContent();
+        $crawler = new Crawler($html);
+
+        $this->assertSame('2', trim($crawler->filter('[data-testid="likes-count"]')->text()));
     }
 
     // ID7-2:

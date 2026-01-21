@@ -28,6 +28,7 @@ class ExhibitTest extends TestCase
         $res->assertSee('name="image"', false);
         $res->assertSee('name="name"', false);
         $res->assertSee('name="category_ids[]"', false);
+        $res->assertSee('name="condition"', false);
         $res->assertSee('本');
     }
 
@@ -38,11 +39,9 @@ class ExhibitTest extends TestCase
 
         $seller = User::factory()->create();
 
-        //make category
         $cat1 = Category::create(['name' => '本']);
         $cat2 = Category::create(['name' => '家電']);
 
-        //create png
         $file = UploadedFile::fake()->create('item.png', 10, 'image/png');
 
         $payload = [
@@ -57,10 +56,8 @@ class ExhibitTest extends TestCase
 
         $res = $this->actingAs($seller)->post(route('sell.store'), $payload);
 
-        //redirect to index
         $res->assertRedirect(route('items.index'));
 
-        //item exists on table
         $this->assertDatabaseHas('items', [
             'seller_id'   => $seller->id,
             'name'        => 'テスト出品',
@@ -73,11 +70,9 @@ class ExhibitTest extends TestCase
 
         $item = Item::where('seller_id', $seller->id)->where('name', 'テスト出品')->firstOrFail();
 
-        //image exists on storage
         $this->assertNotEmpty($item->image_path);
         Storage::disk('public')->assertExists($item->image_path);
 
-        //category_item
         $this->assertDatabaseHas('category_item', [
             'item_id'     => $item->id,
             'category_id' => $cat1->id,

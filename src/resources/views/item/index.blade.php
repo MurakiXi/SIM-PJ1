@@ -25,12 +25,6 @@ $keyword = request('keyword');
     </div>
 </div>
 
-@guest
-@if($tab === 'mylist')
-<p>（未認証のため表示できません）</p>
-@endif
-@endguest
-
 @if(!($tab === 'mylist' && auth()->guest()))
 <div class="list__inner">
     @forelse($items as $item)

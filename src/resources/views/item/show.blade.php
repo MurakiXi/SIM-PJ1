@@ -31,7 +31,7 @@
         <table class="show__table">
             <tr class="show__table-row">
                 <th class="show__table-item">
-                    @auth
+
                     <form action="{{ route('items.like', $item) }}" method="post">
                         @csrf
                         <button type="submit" class="like-button">
@@ -42,27 +42,24 @@
                                 alt="いいね">
                         </button>
                     </form>
-                    @else
-                    <img class="show__data-fav" src="{{ asset('assets/images/heart-blank.png') }}" alt="いいね">
-                    @endauth
                 </th>
                 <th class="show__table-item">
                     <img class="show__data-fav" src="{{ asset('assets/images/comment.png') }}" alt="コメント">
                 </th>
             </tr>
             <tr class="show__table-row">
-                <th class="show__table-item">{{ $item->likes_count ?? 0 }}</th>
+                <th class="show__table-item"><span data-testid="likes-count">{{ $item->likes_count ?? 0 }}</span></th>
                 <th class="show__table-item">{{ $item->comments_count ?? 0 }}</th>
             </tr>
         </table>
 
-        @if($item->status === 'on_sale')
         <div class="show__purchase-button">
+            @if($item->status === 'on_sale')
             <a href="{{ route('purchase.show', $item) }}" class="show__purchase">購入手続きへ</a>
             @elseif($item->status === 'processing')
-            <div class="show__purchase-disabled">購入手続き中</div>
+            <div class="show__purchase">購入手続き中</div>
             @else
-            <div class="show__purchase-disabled">売約済み</div>
+            <div class="show__purchase">売約済み</div>
             @endif
         </div>
         <div class="show__data-title">商品説明</div>
@@ -84,7 +81,7 @@
                 </td>
             </tr>
         </table>
-        <div class="show__data-title">コメント({{ $item->comments_count ?? 0 }})</div>
+        <div class="show__data-title">コメント(<span data-testid="comments-count">{{ $item->comments_count ?? 0 }}</span>)</div>
         @foreach($item->comments as $comment)
         <div class="show__comment">
             <div class="show__comment-profile">
@@ -102,7 +99,6 @@
             <div class="show__comment-body">{{ $comment->body }}</div>
         </div>
         @endforeach
-        @auth
         <form action="{{ route('items.comment', $item) }}" class="show__comment-form" method="POST">
             @csrf
             <div class="show__comment-title">商品へのコメント</div>
@@ -112,7 +108,6 @@
                 <button class="show__comment-button-submit" type="submit">コメントを送信する</button>
             </div>
         </form>
-        @endauth
     </div>
 </div>
 @endsection

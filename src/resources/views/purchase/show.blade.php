@@ -30,7 +30,6 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
             </div>
             <div class="purchase__data-payment">
                 <div class="purchase__data-label">支払い方法</div>
-
                 <div class="payment-method-wrap">
                     <select class="payment-method" id="payment_method" name="payment_method" required>
                         <option value="" disabled hidden {{ $selectedPayment ? '' : 'selected' }}>選択してください</option>
@@ -41,15 +40,15 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
                 </div>
 
                 @error('payment_method')
-                <p class="error">{{ $message }}</p>
+                <p class="form__error">{{ $message }}</p>
                 @enderror
 
                 @error('address_id')
-                <p class="error">{{ $message }}</p>
+                <p class="form__error">{{ $message }}</p>
                 @enderror
 
                 @error('purchase')
-                <p class="error">{{ $message }}</p>
+                <p class="form__error">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -59,13 +58,16 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
                     <a class="purchase__address-change" href="{{ route('purchase.address.edit', $item) }}" class="purchase__data-change">変更する</a>
                 </div>
                 <div class="purchase__data-address-content">
-                    @if($address)
-                    〒{{ $address->postal_code }}<br>
-                    {{ $address->address }}<br>
-                    {{ $address->building }}
+                    @if ($displayAddress)
+                    <p>〒 {{ $displayAddress['postal_code'] }}</p>
+                    <p>{{ $displayAddress['address'] }}</p>
+                    @if (!empty($displayAddress['building']))
+                    <p>{{ $displayAddress['building'] }}</p>
+                    @endif
                     @else
                     <p>配送先住所が未登録です。プロフィールから住所を登録してください。</p>
                     @endif
+
                 </div>
 
             </div>

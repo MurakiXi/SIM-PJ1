@@ -31,11 +31,12 @@
 
 .profile__image-choice-button {
     margin: auto 50px;
-    color: red;
-    border: 1px solid red;
+    color: #ff5555;
+    border: 2px solid #ff5555;
     border-radius: 5px;
     height: 40px;
     padding: 5px 15px;
+    font-weight: bold;
 }
 
 .profile__file-input {
@@ -76,7 +77,7 @@
 
 .form__error {
     margin: 0;
-    color: red;
+    color: #ff5555;
 }
 
 .profile__form-button {
@@ -87,7 +88,7 @@
     width: 100%;
     border: none;
     color: #fff;
-    background: red;
+    background: #ff5555;
     font-weight: bold;
     font-size: 16px;
     border-radius: 3px;

@@ -36,20 +36,21 @@ $tab = request('page', 'sell');
 </div>
 
 
-@if ($mode === 'buy')
+@if ($tab === 'buy')
 
 @if ($orders->isEmpty())
-<p>購入済みの商品はまだありません。</p>
+<div class="profile__list-message">購入済みの商品はまだありません。</div>
 @else
-<ul>
-    @foreach ($orders as $order)
-    <li class="profile__trade-list">
-        {{ $order->item->name ?? '（商品情報なし）' }}
-        / {{ $order->item->price ?? '' }}
-        / {{ $order->paid_at ?? $order->created_at }}
-    </li>
-    @endforeach
-</ul>
+@foreach ($orders as $order)
+<div class="profile__list-card">
+    <div class="profile__list-image">
+        <img src="{{ $order->item->image_path ? asset('storage/'.$order->item->image_path) : '' }}" alt="{{ $order->item->name }}">
+    </div>
+    <div class="profile__list-name">
+        {{ $order->item->name }}
+    </div>
+</div>
+@endforeach
 
 {{ $orders->links() }}
 @endif
@@ -57,7 +58,7 @@ $tab = request('page', 'sell');
 @else
 
 @if ($items->isEmpty())
-<p>出品した商品はまだありません。</p>
+<div class="profile__list-message">出品した商品はまだありません。</div>
 @else
 <div class="profile__list">
     @foreach ($items as $item)

@@ -15,6 +15,12 @@ use Stripe\Checkout\Session as StripeSession;
 class PurchaseController extends Controller
 {
     //
+
+    private function shippingSessionKey(int $itemId): string
+    {
+        return "purchase.shipping.{$itemId}";
+    }
+
     public function purchase(Item $item, Request $request)
     {
         $item->releaseProcessingIfExpired();
@@ -22,25 +28,36 @@ class PurchaseController extends Controller
 
         $user = $request->user();
 
-        if ($item->seller_id === $user->id) {
-            abort(403);
-        }
+        if ($item->seller_id === $user->id) abort(403);
+        if ($item->status === 'sold') abort(404);
+        if ($item->activeOrder()->exists()) abort(404);
 
-        if ($item->status === 'sold') {
-            abort(404);
-        }
+        $address  = $user->address;
+        $shipping = $request->session()->get("purchase.shipping.{$item->id}");
 
-        if ($item->activeOrder()->exists()) {
-            abort(404);
-        }
-        $address = $user->address;
+        $displayAddress = $shipping ?: ($address ? [
+            'postal_code' => $address->postal_code,
+            'address'     => $address->address,
+            'building'    => $address->building,
+        ] : null);
 
         $paymentMethods = [
             'convenience_store' => 'コンビニ払い',
-            'card' => 'カード支払い',
+            'card'              => 'カード支払い',
         ];
 
-        return view('purchase.show', compact('item', 'address', 'paymentMethods'));
+        $selectedPayment =
+            old('payment_method')
+            ?? $request->session()->get("purchase.payment_method.{$item->id}")
+            ?? null;
+
+        return view('purchase.show', compact(
+            'item',
+            'address',
+            'displayAddress',
+            'paymentMethods',
+            'selectedPayment'
+        ));
     }
 
     public function checkout(PurchaseRequest $request, Item $item)
@@ -50,9 +67,7 @@ class PurchaseController extends Controller
 
         $user = $request->user();
 
-        if ($item->seller_id === $user->id) {
-            abort(403);
-        }
+        if ($item->seller_id === $user->id) abort(403);
 
         if ($item->status !== 'on_sale' || $item->activeOrder()->exists()) {
             return back()->withErrors(['purchase' => 'この商品は購入できません。']);
@@ -67,11 +82,25 @@ class PurchaseController extends Controller
             ->where('user_id', $user->id)
             ->firstOrFail();
 
+        $shipping = $request->session()->get("purchase.shipping.{$item->id}", []);
+
+        $shipPostal   = $shipping['postal_code'] ?? $address->postal_code;
+        $shipAddress  = $shipping['address']     ?? $address->address;
+        $shipBuilding = array_key_exists('building', $shipping) ? $shipping['building'] : $address->building;
+
         Stripe::setApiKey(config('services.stripe.secret'));
 
         $reservedUntil = now()->addMinutes(30);
 
-        $order = DB::transaction(function () use ($user, $item, $paymentMethod, $address, $reservedUntil) {
+        $order = DB::transaction(function () use (
+            $user,
+            $item,
+            $paymentMethod,
+            $reservedUntil,
+            $shipPostal,
+            $shipAddress,
+            $shipBuilding
+        ) {
             $lockedItem = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
 
             if ($lockedItem->status !== 'on_sale' || $lockedItem->activeOrder()->exists()) {
@@ -88,16 +117,14 @@ class PurchaseController extends Controller
                 'buyer_id'          => $user->id,
                 'payment_method'    => $paymentMethod,
                 'stripe_session_id' => null,
-                'ship_postal_code'  => $address->postal_code,
-                'ship_address'      => $address->address,
-                'ship_building'     => $address->building,
+                'ship_postal_code'  => $shipPostal,
+                'ship_address'      => $shipAddress,
+                'ship_building'     => $shipBuilding,
                 'price_at_purchase' => $lockedItem->price,
                 'payment_status'    => 'pending',
             ]);
 
-
             $order->reserved_until = $reservedUntil;
-
             $order->save();
 
             return $order;
@@ -128,9 +155,7 @@ class PurchaseController extends Controller
                 'cancel_url'  => route('purchase.cancel',  $item),
             ]);
 
-            $order->update([
-                'stripe_session_id' => $session->id,
-            ]);
+            $order->update(['stripe_session_id' => $session->id]);
 
             return redirect()->away($session->url);
         } catch (\Throwable $e) {
@@ -151,6 +176,7 @@ class PurchaseController extends Controller
             throw $e;
         }
     }
+
 
     public function cancel(Request $request, Item $item)
     {
@@ -263,20 +289,31 @@ class PurchaseController extends Controller
 
     public function editAddress(Item $item, Request $request)
     {
-        $address = $request->user()->address;
+        $key = $this->shippingSessionKey($item->id);
+
+        $sessionAddress = $request->session()->get($key);
+
+        if ($sessionAddress) {
+            $address = new \App\Models\Address($sessionAddress);
+        } else {
+            $address = $request->user()->address ?? new \App\Models\Address();
+        }
 
         return view('purchase.address', compact('item', 'address'));
     }
 
     public function updateAddress(AddressRequest $request, Item $item)
     {
-        $user = $request->user();
+        $validated = $request->validated();
 
-        $user->address()->updateOrCreate([], [
-            'postal_code' => $request->validated()['postal_code'],
-            'address'     => $request->validated()['address'],
-            'building'    => $request->validated()['building'] ?? null,
-        ]);
+        $request->session()->put(
+            $this->shippingSessionKey($item->id),
+            [
+                'postal_code' => $validated['postal_code'],
+                'address'     => $validated['address'],
+                'building'    => $validated['building'] ?? null,
+            ]
+        );
 
         return redirect()->route('purchase.show', $item);
     }

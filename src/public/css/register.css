@@ -38,7 +38,7 @@
 .auth__register-button-submit {
     width: 100%;
     color: #fff;
-    background: red;
+    background: #ff5555;
     height: 40px;
     border-radius: 3px;
     border: none;
@@ -52,11 +52,11 @@
 }
 
 .auth__register-login {
-    color: blue;
+    color: #0d71e4;
     text-align: center;
 }
 
 .auth__error {
-    color: red;
+    color: #ff5555;
     font-weight: bold;
 }

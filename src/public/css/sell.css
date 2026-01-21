@@ -99,9 +99,9 @@
     align-items: center;
     justify-content: center;
     padding: 5px 15px;
-    border: 1px solid red;
+    border: 1px solid #ff5555;
     border-radius: 15px;
-    color: red;
+    color: #ff5555;
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
@@ -109,7 +109,7 @@
 }
 
 .sell__category-check:checked+.sell__category-btn {
-    background: red;
+    background: #ff5555;
     color: #fff;
 }
 
@@ -141,6 +141,11 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     margin-bottom: 30px;
+}
+
+.item-condition-choice {
+    background: #555;
+    color: white;
 }
 
 .sell__item-input {
@@ -195,7 +200,7 @@
 .sell__exhibit-button-submit {
     width: 100%;
     color: white;
-    background-color: red;
+    background-color: #ff5555;
     text-align: center;
     border: none;
     border-radius: 5px;

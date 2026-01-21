@@ -20,11 +20,12 @@ class LoginTest extends TestCase
         ], $overrides));
     }
 
-    //ID2-1
+    //ID2-1　メールアドレスが入力されていない場合、バリデーションメッセージが表示される
     public function test_login_email_required(): void
     {
         $this->createUser();
 
+        //2.メールアドレスを入力せずに他の必要項目を入力(準備)する
         $response = $this
             ->from('/login')
             ->post('/login', [
@@ -32,9 +33,16 @@ class LoginTest extends TestCase
                 'password' => 'password123',
             ]);
 
+        //1.ログインページを開く
         $response->assertStatus(302);
+        //3.ログインボタンを押す
         $response->assertRedirect('/login');
-        $response->assertSessionHasErrors('email');
+
+        //期待挙動
+        $response->assertSessionHasErrors([
+            'email' => 'メールアドレスを入力してください',
+        ]);
+
 
         $this->assertGuest();
     }
@@ -44,6 +52,7 @@ class LoginTest extends TestCase
     {
         $this->createUser();
 
+        //2.パスワードを入力せずに他の必要項目を入力(準備)する
         $response = $this
             ->from('/login')
             ->post('/login', [
@@ -51,9 +60,16 @@ class LoginTest extends TestCase
                 'password' => '',
             ]);
 
+        //1.ログインページを開く
         $response->assertStatus(302);
+        //3.ログインボタンを押す
         $response->assertRedirect('/login');
-        $response->assertSessionHasErrors('password');
+
+        //期待挙動
+        $response->assertSessionHasErrors([
+            'password' => 'パスワードを入力してください',
+        ]);
+
 
         $this->assertGuest();
     }
@@ -61,6 +77,7 @@ class LoginTest extends TestCase
     //ID2-3
     public function test_login_invalid_password_fails(): void
     {
+        //2.必要項目に登録されていない情報を入力(準備)する
         $this->createUser([
             'email' => 'taro@example.com',
             'password' => Hash::make('password123'),
@@ -69,14 +86,20 @@ class LoginTest extends TestCase
         $response = $this
             ->from('/login')
             ->post('/login', [
-                'email' => 'taro@example.com',
+                'email' => 'jiro@example.com',
                 'password' => 'wrong-password',
             ]);
 
+        //1.ログインページを開く
         $response->assertStatus(302);
+        //3.ログインボタンを押す
         $response->assertRedirect('/login');
 
-        $response->assertSessionHasErrors('email');
+        //期待挙動
+
+        $response->assertSessionHasErrors([
+            'email' => 'ログイン情報が登録されていません'
+        ]);
 
         $this->assertGuest();
     }
@@ -84,11 +107,15 @@ class LoginTest extends TestCase
     //ID2-4
     public function test_login_success(): void
     {
+        //2.全ての必要項目を入力(準備)する
         $user = $this->createUser([
             'email' => 'taro@example.com',
             'password' => Hash::make('password123'),
         ]);
 
+        //1.ログインページを開く
+        $this->get('/login')->assertOk();
+        //3.ログインボタンを押す
         $response = $this
             ->post('/login', [
                 'email' => 'taro@example.com',

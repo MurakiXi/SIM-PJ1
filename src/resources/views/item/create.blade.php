@@ -7,6 +7,12 @@
 @endsection
 
 @section('content')
+@php
+$selectedCondition = old('condition', '');
+$conditionLabel = $condition[$selectedCondition] ?? $condition[''] ?? '選択してください';
+@endphp
+
+
 <div class="sell__inner">
     <div class="sell__title">
         <h1>商品の出品</h1>
@@ -55,17 +61,19 @@
         </div>
         <div class="sell__item">
             <div class="sell__detail-label">商品の状態</div>
+
             <div class="select-wrap">
                 <select class="sell__item-condition" name="condition">
-                    <option value="">選択してください</option>
+                    <option value="" disabled hidden {{ $selectedCondition ? '' : 'selected' }}>選択してください</option>
                     @foreach($conditions as $value => $label)
-                    <option value="{{ $value }}" {{ (string)$value === (string)old('condition') ? 'selected' : '' }}>
+                    <option class="item-condition-choice" value="{{ $value }}" {{ (string)$value === (string)old('condition') ? 'selected' : '' }}>
                         {{ $label }}
                     </option>
                     @endforeach
                 </select>
             </div>
             @error('condition') <p class="form__error">{{ $message }}</p> @enderror
+
         </div>
         <div class="sell__item-description">
             商品名と説明

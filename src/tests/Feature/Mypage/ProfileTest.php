@@ -28,32 +28,87 @@ class ProfileTest extends TestCase
         ], $overrides));
     }
 
-    //ID13
+    private function createOrder(User $buyer, Item $item, array $overrides = []): Order
+    {
+        return Order::create(array_merge([
+            'item_id'           => $item->id,
+            'buyer_id'          => $buyer->id,
+            'payment_method'    => 'card',
+            'stripe_session_id' => 'cs_test_' . uniqid(),
+            'ship_postal_code'  => '150-0001',
+            'ship_address'      => '東京都渋谷区',
+            'ship_building'     => 'テストビル',
+            'price_at_purchase' => $item->price,
+            'payment_status'    => 'paid',
+            'reserved_until'    => null,
+            'paid_at'           => now(),
+        ], $overrides));
+    }
+
+
+    //ID13　必要な情報が取得できる（プロフィール画像、ユーザー名、出品した商品一覧、購入した商品一覧）
     public function test_get_user_information(): void
     {
         $user = User::factory()->create(['name' => 'ユーザーテスト']);
         $user->profile_image = 'profiles/test.png';
         $user->save();
 
-        //own items
-        $item1 = $this->createItem(['seller_id' => $user->id, 'name' => '出品A']);
-        $item2 = $this->createItem(['seller_id' => $user->id, 'name' => '出品B', 'status' => 'sold']);
+        $this->createItem(['seller_id' => $user->id, 'name' => '出品A']);
+        $this->createItem(['seller_id' => $user->id, 'name' => '出品B', 'status' => 'sold']);
 
-        $res = $this->actingAs($user)->get(route('mypage'));
+        $otherSeller = User::factory()->create();
+        $paidItem = $this->createItem(['seller_id' => $otherSeller->id, 'name' => '購入済み商品']);
+        Order::create([
+            'item_id' => $paidItem->id,
+            'buyer_id' => $user->id,
+            'payment_method' => 'card',
+            'stripe_session_id' => 'cs_test_paid_sell_1',
+            'ship_postal_code' => '150-0001',
+            'ship_address' => '東京都渋谷区',
+            'ship_building' => 'ビル',
+            'price_at_purchase' => $paidItem->price,
+            'payment_status' => 'paid',
+            'reserved_until' => now()->addMinutes(30),
+            'paid_at' => now(),
+        ]);
+
+        //1.ユーザーにログインする
+        //2.プロフィールページを開く(出品一覧)
+        $res = $this->actingAs($user)->get(route('mypage', ['page' => 'sell']));
 
         $res->assertOk();
 
-        //can see username and image
+        $sellHref = 'href="' . route('mypage', ['page' => 'sell']) . '"';
+        $buyHref  = 'href="' . route('mypage', ['page' => 'buy']) . '"';
+
+        $res->assertSeeInOrder([
+            $sellHref,
+            'profile__tab-link is-active',
+            'aria-current="page"',
+            '出品した商品',
+        ], false);
+
+        $res->assertSeeInOrder([
+            $buyHref,
+            'aria-current="false"',
+            '購入した商品',
+        ], false);
+
+        $res->assertDontSee($buyHref . ' class="profile__tab-link is-active"', false);
+
         $res->assertSee('ユーザーテスト');
         $res->assertSee('storage/profiles/test.png', false);
 
-        //exhibit list
-        $res->assertSee('出品した商品一覧');
+        $res->assertSee('出品した商品');
+        $res->assertSee('購入した商品');
+
         $res->assertSee('出品A');
         $res->assertSee('出品B');
+        $res->assertDontSee('購入済み商品');
     }
 
-    //ID13
+
+    //ID13　必要な情報が取得できる（プロフィール画像、ユーザー名、出品した商品一覧、購入した商品一覧）
     public function test_bought_list_includes_only_paid(): void
     {
         $user = User::factory()->create(['name' => '購入者']);
@@ -65,7 +120,6 @@ class ProfileTest extends TestCase
         $paidItem = $this->createItem(['seller_id' => $seller->id, 'name' => '購入済み商品', 'price' => 777]);
         $pendingItem = $this->createItem(['seller_id' => $seller->id, 'name' => '未決済商品', 'price' => 888]);
 
-        //paid
         Order::create([
             'item_id'          => $paidItem->id,
             'buyer_id'         => $user->id,
@@ -80,7 +134,6 @@ class ProfileTest extends TestCase
             'paid_at'          => now(),
         ]);
 
-        //pending
         Order::create([
             'item_id'          => $pendingItem->id,
             'buyer_id'         => $user->id,
@@ -94,21 +147,45 @@ class ProfileTest extends TestCase
             'reserved_until'   => now()->addMinutes(10),
         ]);
 
+        $this->createItem(['seller_id' => $user->id, 'name' => '自分の出品商品']);
+
+        //1.ユーザーにログインする
+        //2.プロフィールページを開く(購入一覧)
         $res = $this->actingAs($user)->get(route('mypage', ['page' => 'buy']));
 
         $res->assertOk();
 
-        //user information
+        $sellHref = 'href="' . route('mypage', ['page' => 'sell']) . '"';
+        $buyHref  = 'href="' . route('mypage', ['page' => 'buy']) . '"';
+
+        $res->assertSeeInOrder([
+            $buyHref,
+            'profile__tab-link is-active',
+            'aria-current="page"',
+            '購入した商品',
+        ], false);
+
+        $res->assertSeeInOrder([
+            $sellHref,
+            'aria-current="false"',
+            '出品した商品',
+        ], false);
+
+        $res->assertDontSee($sellHref . ' class="profile__tab-link is-active"', false);
+
         $res->assertSee('購入者');
         $res->assertSee('storage/profiles/buyer.png', false);
 
-        //bought list
-        $res->assertSee('購入した商品一覧');
+        $res->assertSee('出品した商品');
+        $res->assertSee('購入した商品');
+        $res->assertSee('page=buy', false);
+
         $res->assertSee('購入済み商品');
         $res->assertDontSee('未決済商品');
+        $res->assertDontSee('自分の出品商品');
     }
 
-    //ID14
+    //ID14　変更項目が初期値として設定されていること（プロフィール画像、ユーザー名、郵便番号、住所）
     public function test_profile_edit_page_prefills_user_and_address_values(): void
     {
         $user = User::factory()->create([
@@ -122,22 +199,21 @@ class ProfileTest extends TestCase
             'building'    => '旧ビル101',
         ]);
 
+        //1.ユーザーにログインする
+        //2.プロフィールページを開く
         $res = $this->actingAs($user)->get(route('mypage.profile'));
         $res->assertOk();
 
-        //old name
+        //各項目の初期値が正しく表示されている
         $res->assertSee('value="旧ユーザー名"', false);
-
-        //address
         $res->assertSee('value="100-0001"', false);
         $res->assertSee('value="東京都千代田区テスト1-1-1"', false);
         $res->assertSee('value="旧ビル101"', false);
 
-        //image
         $res->assertSee('storage/profiles/old.png', false);
     }
 
-
+    //ID14　変更項目が初期値として設定されていること（プロフィール画像、ユーザー名、郵便番号、住所）
     public function test_profile_update_persists_user_and_address_and_reflects_as_prefill(): void
     {
         Storage::fake('public');
@@ -163,10 +239,8 @@ class ProfileTest extends TestCase
             'profile_image' => $file,
         ]);
 
-        //302
         $patch->assertStatus(302);
 
-        //exists on table
         $this->assertDatabaseHas('users', [
             'id'   => $user->id,
             'name' => '新ユーザー名',
@@ -179,18 +253,22 @@ class ProfileTest extends TestCase
             'building'    => '新ビル202',
         ]);
 
-        //image exists on storage
         $freshUser = $user->fresh();
-        if (!empty($freshUser->profile_image)) {
-            Storage::disk('public')->assertExists($freshUser->profile_image);
-        }
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'profile_image' => $freshUser->profile_image,
+        ]);
+        $this->assertNotEquals('profiles/old.png', $freshUser->profile_image);
+        $this->assertNotEmpty($freshUser->profile_image);
 
-        //get again and can see new information
+        //(変更した)各項目の初期値が正しく表示されている
         $res = $this->actingAs($freshUser)->get(route('mypage.profile'));
         $res->assertOk();
         $res->assertSee('value="新ユーザー名"', false);
         $res->assertSee('value="150-0001"', false);
         $res->assertSee('value="東京都渋谷区テスト2-2-2"', false);
         $res->assertSee('value="新ビル202"', false);
+
+        $this->assertDatabaseCount('addresses', 1);
     }
 }

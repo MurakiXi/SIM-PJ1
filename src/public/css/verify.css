@@ -23,9 +23,9 @@
     color: inherit;
 }
 
-.verify__resend-mail{
-    background:#fff;
-    border:none;
-    color:blue;
-    font-size:14px;
+.verify__resend-mail {
+    background: #fff;
+    border: none;
+    color: #0d71e4;
+    font-size: 14px;
 }

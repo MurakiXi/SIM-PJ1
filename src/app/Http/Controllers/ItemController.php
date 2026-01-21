@@ -36,6 +36,10 @@ class ItemController extends Controller
         $tab     = (string) $request->query('tab', '');
         $keyword = trim((string) $request->query('keyword', ''));
 
+        if ($tab === 'mylist' && !auth()->check()) {
+            return redirect()->guest(route('login'));
+        }
+
         $query = $this->baseQuery();
 
         $query->when($keyword !== '', function (Builder $q) use ($keyword) {
@@ -48,8 +52,6 @@ class ItemController extends Controller
                 $query->whereHas('likes', function (Builder $q) {
                     $q->where('user_id', auth()->id());
                 });
-            } else {
-                $query->whereRaw('1 = 0');
             }
         }
 

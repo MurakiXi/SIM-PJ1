@@ -3,11 +3,12 @@
     justify-content: space-between;
     margin: 50px auto;
     width: 50%;
+    heigh:300px;
 }
 
 .mypage__header-image {
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     overflow: hidden;
 }
@@ -27,19 +28,21 @@
 }
 
 .mypage__profile-name {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
     width: 150px;
-    margin: 25px auto;
+    margin: auto;
 }
 
 .mypage__edit-profile {
     margin: auto 50px;
-    color: red;
-    border: 1px solid red;
+    color: #ff5555;
+    border: 2px solid #ff5555;
     border-radius: 5px;
     height: 40px;
-    padding: 5px 30px;
+    padding: 5px 20px;
+    text-decoration: none;
+    font-weight:bold;
 }
 
 .profile__tab {
@@ -51,6 +54,12 @@
     text-decoration: none;
 }
 
+.profile__list-message {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 15px 90px;
+}
+
 .profile__tab-link {
     display: inline-block;
     margin: 0 45px 10px 90px;
@@ -60,7 +69,7 @@
 }
 
 .profile__tab-link.is-active {
-    color: red;
+    color: #ff5555;
 }
 
 .profile__tab-exhibit a,

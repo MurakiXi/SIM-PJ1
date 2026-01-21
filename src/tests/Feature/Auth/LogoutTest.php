@@ -20,28 +20,32 @@ class LogoutTest extends TestCase
         ]);
     }
 
-    //ID3
+    //ID3　ログアウトができる
     public function test_logout_success(): void
     {
         $user = $this->createUser();
 
+        //1.ユーザーにログインをする
         $this->actingAs($user);
         $this->assertAuthenticatedAs($user);
 
+        //2.ログアウトボタンを押す
         $response = $this
             ->from('/')
             ->post('/logout');
-
+        //3.ログアウト処理が実行される
         $response->assertStatus(302);
 
         $this->assertGuest();
     }
 
-    //ID3 guest
+    //(未認証状態でのログアウトで破綻しない)
     public function test_logout_as_guest_does_not_break(): void
     {
+        //未認証状態でログアウト
         $response = $this->post('/logout');
 
+        //302
         $response->assertStatus(302);
 
         $this->assertGuest();

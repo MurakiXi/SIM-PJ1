@@ -6,12 +6,17 @@
 .show-image {
     grid-row: 1/2;
     width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
 }
 
 .show-image__img {
     width: 70%;
+    height: 70%;
     margin: 100px auto;
     display: block;
+    object-fit: cover;
+    object-position: center;
 }
 
 .show__data {
@@ -30,7 +35,7 @@
 
 .show__data-sold {
     font-size: 30px;
-    color: red;
+    color: #ff5555;
 }
 
 .show__data-unknown {
@@ -51,7 +56,7 @@
 
 .show__purchase-button {
     width: 100%;
-    background: red;
+    background: #ff5555;
     height: 40px;
     text-align: center;
     padding: 5px;
@@ -60,9 +65,13 @@
 
 .show__purchase {
     color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-decoration: none;
     font-weight: bold;
     font-size: 18px;
+    width: 100%;
 }
 
 .show__data-title {
@@ -82,7 +91,7 @@
 
 .show__data-item-category {
     font-size: 14px;
-    background: #ccc;
+    background: #ddd;
     border-radius: 20px;
     text-align: center;
     padding: 0 20px;
@@ -129,7 +138,7 @@
 
 .show__comment-body {
     width: 100%;
-    background: #ccc;
+    background: #ddd;
     border-radius: 5px;
     padding: 15px;
     margin: 20px auto;
@@ -149,11 +158,16 @@
 .show__comment-button-submit {
     border: none;
     width: 100%;
-    background: red;
+    background: #ff5555;
     color: white;
     margin: 20px 0;
     font-size: 18px;
     font-weight: bold;
     padding: 10px 0;
     border-radius: 5px;
+}
+
+.form__error {
+    color: #ff5555;
+    font-weight: bold;
 }

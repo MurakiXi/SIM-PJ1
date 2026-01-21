@@ -16,7 +16,7 @@
 }
 
 .list__head-link.is-active {
-    color: red;
+    color: #ff5555;
 }
 
 .list__head-recommend a,

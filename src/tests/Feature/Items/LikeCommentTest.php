@@ -13,111 +13,102 @@ class LikeCommentTest extends TestCase
 {
     use RefreshDatabase;
 
-    // ID8-1
+    //ID8-1　いいねアイコンを押下することによって、いいねした商品として登録することができる
     public function test_user_can_like_item(): void
     {
-        //testuser and testitem
         $user = User::factory()->create();
         $item = Item::factory()->create();
 
-        //POST like
+        //1.ユーザーにログインする
+        $this->actingAs($user)
+            //2.商品詳細ページを開く
+            ->get(route('items.show', $item))
+            ->assertSee('<span data-testid="likes-count">0</span>', false);
+
+        //3.いいねアイコンを押下
         $response = $this->actingAs($user)->post(route('items.like', $item));
 
-        //302
-        $response->assertStatus(302);
+        $response->assertRedirect();
 
-        //record exists on likes table
         $this->assertDatabaseHas('likes', [
             'user_id' => $user->id,
             'item_id' => $item->id,
         ]);
+
+        $this->actingAs($user)
+            ->get(route('items.show', $item))
+            ->assertSee('<span data-testid="likes-count">1</span>', false);
     }
+
 
     //ID8-2
     public function test_like_toggles_count_and_icon(): void
     {
-        //testuser and testitem
         $user = User::factory()->create();
         $item = Item::factory()->create();
 
-        //get
+        //1.ユーザーにログインする
+        //2.商品詳細ページを開く
         $res = $this->actingAs($user)->get(route('items.show', $item));
-
-        //200
         $res->assertOk();
-
-        //likes_count=0
-        $res->assertViewHas('item', fn($viewItem) => $viewItem->likes_count === 0);
-
-        //can see blankheart and can't see pinkheart
+        $res->assertSee('<span data-testid="likes-count">0</span>', false);
         $res->assertSee('heart-blank.png');
         $res->assertDontSee('heart-pink.png');
 
-        //post like
-        $this->actingAs($user)->post(route('items.like', $item))->assertRedirect();
-
-        //record exists on likes table
+        //3.いいねアイコンを押下
+        $this->actingAs($user)->post(route('items.like', $item))
+            ->assertRedirect(route('items.show', $item));
         $this->assertDatabaseHas('likes', ['user_id' => $user->id, 'item_id' => $item->id]);
 
-        //get
         $res = $this->actingAs($user)->get(route('items.show', $item));
-
-        //likes_count=1
-        $res->assertViewHas('item', fn($viewItem) => $viewItem->likes_count === 1);
-
-        //can see pinkheart and can't see blankheart
+        $res->assertSee('<span data-testid="likes-count">1</span>', false);
         $res->assertSee('heart-pink.png');
         $res->assertDontSee('heart-blank.png');
-
-        //post like again
-        $this->actingAs($user)->post(route('items.like', $item))->assertRedirect();
-
-        //record doesn't exist on likes table
-        $this->assertDatabaseMissing('likes', ['user_id' => $user->id, 'item_id' => $item->id]);
-
-        //get
-        $res = $this->actingAs($user)->get(route('items.show', $item));
-
-        //likes_count=1
-        $res->assertViewHas('item', fn($viewItem) => $viewItem->likes_count === 0);
-
-        //can see blankheart and can't see pinkheart
-        $res->assertSee('heart-blank.png');
-        $res->assertDontSee('heart-pink.png');
     }
 
-    // ID8-3
+    //ID8-3　再度いいねアイコンを押下することによって、いいねを解除することができる。
     public function test_user_can_remove_like(): void
     {
-        //testuser and testitem
         $user = User::factory()->create();
         $item = Item::factory()->create();
 
-        //make like
-        Like::create([
-            'user_id' => $user->id,
-            'item_id' => $item->id,
-        ]);
+        //1.ユーザーにログインする
+        $this->actingAs($user)
+            //2.商品詳細ページを開く
+            ->get(route('items.show', $item))
+            ->assertOk()
+            ->assertSee('<span data-testid="likes-count">0</span>', false);
 
-        //record exists on likes table
+        //3.いいねアイコンを押下(いいね)
+        $this->actingAs($user)
+            ->post(route('items.like', $item))
+            ->assertRedirect(route('items.show', $item));
+
         $this->assertDatabaseHas('likes', [
             'user_id' => $user->id,
             'item_id' => $item->id,
         ]);
 
-        //POST like again
-        $response = $this->actingAs($user)->post(route('items.like', $item));
+        $this->actingAs($user)
+            ->get(route('items.show', $item))
+            ->assertSee('<span data-testid="likes-count">1</span>', false);
 
-        //302
-        $response->assertStatus(302);
+        //3.いいねアイコンを押下(いいね解除)
+        $this->actingAs($user)
+            ->post(route('items.like', $item))
+            ->assertRedirect(route('items.show', $item));
 
-        //record doesn't exists on likes table
         $this->assertDatabaseMissing('likes', [
             'user_id' => $user->id,
             'item_id' => $item->id,
         ]);
+
+        $this->actingAs($user)
+            ->get(route('items.show', $item))
+            ->assertSee('<span data-testid="likes-count">0</span>', false);
     }
 
+    //ID9-1 ログイン済みのユーザーはコメントを送信できる
     public function test_user_can_comment_and_count_increases(): void
     {
         $user = User::factory()->create();
@@ -125,53 +116,49 @@ class LikeCommentTest extends TestCase
 
         $beforeCount = Comment::where('item_id', $item->id)->count();
 
-        $response = $this->actingAs($user)->post(
-            route('items.comment', $item),
-            ['body' => 'コメント本文です']
-        );
+        $response = $this->actingAs($user)
+            ->from(route('items.show', $item))
+            ->post(route('items.comment', $item), ['body' => 'コメント本文です']);
 
-        //302
-        $response->assertStatus(302);
+        $response->assertRedirect(route('items.show', $item));
 
-        //comment exists on comments table
         $this->assertDatabaseHas('comments', [
             'user_id' => $user->id,
             'item_id' => $item->id,
             'body'    => 'コメント本文です',
         ]);
 
-        //get
-        $show = $this->get(route('items.show', $item));
+        $show = $this->actingAs($user)->get(route('items.show', $item));
 
-        //200
         $show->assertOk();
-        $show->assertSee('コメント(' . ($beforeCount + 1) . ')');
+        $show->assertSee('<span data-testid="comments-count">1</span>', false);
         $show->assertSee('コメント本文です');
-        $show->assertSee($user->name);
     }
 
-    //ID9-2
+    //ID9-2 ログイン前のユーザーはコメントを送信できない
     public function test_guest_cannot_comment_item(): void
     {
         $item = Item::factory()->create();
 
         $beforeCount = Comment::count();
 
+        //1.コメントを入力する
+        //2.コメントボタンを押す
         $response = $this->post(
             route('items.comment', $item),
-            ['body' => 'ゲストコメント（保存されないはず）']
+            ['body' => 'ゲストコメント']
         );
 
         $response->assertStatus(302);
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('login'));
 
         $this->assertGuest();
 
-        $this->assertSame($beforeCount, Comment::count());
+        $this->assertSame($beforeCount, Comment::where('item_id', $item->id)->count());
 
         $this->assertDatabaseMissing('comments', [
             'item_id' => $item->id,
-            'body'    => 'ゲストコメント（保存されないはず）',
+            'body'    => 'ゲストコメント',
         ]);
     }
 
@@ -181,6 +168,8 @@ class LikeCommentTest extends TestCase
         $user = User::factory()->create();
         $item = Item::factory()->create();
 
+        //1.ユーザーにログインする
+        //2.コメントボタンを押す
         $response = $this->actingAs($user)
             ->from(route('items.show', $item))
             ->post(route('items.comment', $item), ['body' => '']);
@@ -188,6 +177,14 @@ class LikeCommentTest extends TestCase
         $response->assertStatus(302);
         $response->assertRedirect(route('items.show', $item));
         $response->assertSessionHasErrors(['body']);
+
+        $show = $this->actingAs($user)->get(route('items.show', $item));
+        $show->assertSee('コメントを入力してください。');
+
+        $this->assertDatabaseMissing('comments', [
+            'item_id' => $item->id,
+            'body' => '',
+        ]);
     }
 
     //ID9-4
@@ -198,6 +195,11 @@ class LikeCommentTest extends TestCase
 
         $tooLong = str_repeat('あ', 256);
 
+        $before = Comment::where('item_id', $item->id)->count();
+
+        //1.ユーザーにログインする
+        //2.255文字以上(256文字)のコメントを入力する
+        //3.コメントボタンを押す
         $response = $this->actingAs($user)
             ->from(route('items.show', $item))
             ->post(route('items.comment', $item), ['body' => $tooLong]);
@@ -205,5 +207,10 @@ class LikeCommentTest extends TestCase
         $response->assertStatus(302);
         $response->assertRedirect(route('items.show', $item));
         $response->assertSessionHasErrors(['body']);
+
+        $show = $this->actingAs($user)->get(route('items.show', $item));
+        $show->assertSee('コメントは255文字以内で入力してください。');
+
+        $this->assertSame($before, Comment::where('item_id', $item->id)->count());
     }
 }

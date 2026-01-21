@@ -59,13 +59,7 @@ class MypageController extends Controller
     {
         $user = $request->user();
 
-        $validated = $request->validate([
-            'name'        => ['required', 'string', 'max:20'],
-            'postal_code' => ['nullable', 'string', 'max:8'],
-            'address'     => ['nullable', 'string', 'max:255'],
-            'building'    => ['nullable', 'string', 'max:255'],
-            'profile_image'     => ['nullable', 'image', 'mimes:jpeg,png', 'max:2048'],
-        ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('profile_image')) {
             if (!empty($user->profile_image)) {
