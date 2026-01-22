@@ -124,7 +124,9 @@ docker compose exec mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON larave
 テスト実行：
 
 docker compose exec php vendor/bin/phpunit
-# または
+
+または
+
 docker compose exec php php artisan test
 
 ---
