@@ -25,7 +25,7 @@ class CreateOrdersTable extends Migration
             $table->unsignedInteger('price_at_purchase');
             $table->enum('payment_status', ['pending', 'paid', 'canceled', 'expired']);
             $table->timestamps();
-            $table->timestamp('reserved_until');
+            $table->timestamp('reserved_until')->nullable();;
             $table->timestamp('paid_at')->nullable();
             $table->timestamp('canceled_at')->nullable();
             $table->timestamp('expired_at')->nullable();
