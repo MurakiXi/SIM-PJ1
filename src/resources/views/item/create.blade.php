@@ -99,8 +99,9 @@ $conditionLabel = $condition[$selectedCondition] ?? $condition[''] ?? '選択し
 
         <div class="sell__item-price">
             <div class="sell__description-label">販売価格</div>
-            <span class="price-input__yen">¥</span>
-            <input class="sell__item-input-price" type="number" name="price" min="0" step="1" value="{{ old('price') }}">
+            <div class="sell__item-price-label">
+                <input class="sell__item-input-price" type="number" name="price" min="0" step="1" value="{{ old('price') }}">
+            </div>
             @error('price') <p class="form__error">{{ $message }}</p> @enderror
         </div>
 

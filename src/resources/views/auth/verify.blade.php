@@ -14,7 +14,7 @@
     </div>
 
     <div class="verify__button">
-        <a class="verify__primary" href="http://localhost:8025" target="_blank" rel="noopener">
+        <a class="verify__primary" href="{{ config('app.mailhog_url') }}" target="_blank" rel="noopener">
             認証はこちらから
         </a>
     </div>
