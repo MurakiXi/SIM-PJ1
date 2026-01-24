@@ -82,6 +82,6 @@ class MypageController extends Controller
             ]
         );
 
-        return redirect()->route('mypage.profile')->with('message', 'プロフィールを更新しました。');
+        return redirect()->route('items.index')->with('message', 'プロフィールを更新しました。');
     }
 }

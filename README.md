@@ -26,16 +26,17 @@ Laravel 8 を用いたフリマアプリ（Docker環境）。
 
 ## 環境構築
 
-### 1) Dockerビルド
+### 1. Dockerビルド
+
 ```bash
 git clone https://github.com/MurakiXi/SIM-PJ1.git
 cd SIM-PJ1
 docker compose up -d --build
 # ※ docker-compose の環境では `docker-compose up -d --build` でも可
 ```
-### 2) Laravel 初期化（php コンテナ内）
+### 2. Laravel 初期化（php コンテナ内）
+
 ```bash
-コードをコピーする
 docker compose exec php bash
 composer install
 cp .env.example .env
@@ -44,12 +45,10 @@ php artisan storage:link
 php artisan migrate --seed
 ```
 
-### 3) .env 設定（重要）
-```bash
+### 3. .env 設定（重要）
 src/.env（コンテナ内では /var/www/.env）を以下に合わせてください。
 
-env
-コードをコピーする
+```bash
 APP_URL=http://localhost
 
 DB_CONNECTION=mysql
@@ -95,21 +94,35 @@ Mailhog: http://localhost:8025
 
 ### Stripe / Webhook（購入機能）
 
-本アプリは Stripe を利用します。ローカルで決済フローを確認する場合は .env に Stripe のテストキーを設定してください。
+本アプリは Stripe を利用します。ローカルで決済フローを確認する場合は `.env` に Stripe のテストキーを設定してください。  
 支払い結果（成功/キャンセル等）の反映に Webhook を利用します。
 
-Webhook受信エンドポイント: POST /stripe/webhook（route name: stripe.webhook）
+Webhook受信エンドポイント: `POST /stripe/webhook`（route name: `stripe.webhook`）
 
----
+### ローカルでWebhookを受信する（Stripe CLI必須：APP_URL=http://localhost の場合）
 
-### ローカルでWebhookを受信する（Stripe CLI）
+Stripeは `localhost` へ直接Webhookを送信できないため、ローカルで決済結果（特にコンビニ決済）を反映するには  
+Stripe CLIでWebhookを転送してください。
 
-APP_URL が http://localhost の場合：
+1) Stripe CLIを起動（別ターミナル）
 
-bash
-コードをコピーする
+```bash
+stripe login
 stripe listen --forward-to http://localhost/stripe/webhook
+```
+
 コマンド実行後に表示される whsec_... を .env の STRIPE_WEBHOOK_SECRET に設定してください。
+
+
+2) stripe listen 実行後に表示される whsec_... を .env の STRIPE_WEBHOOK_SECRET に設定
+
+3) 設定反映（phpコンテナ内）
+
+```bash
+docker compose exec php php artisan config:clear
+```
+
+※ stripe listen は起動し続けてください。停止するとWebhookが届かず、注文が pending のままになります。
 
 ※ コンビニ決済は非同期のため、Webhookが動いていないと購入確定（paid反映）しません。
 
@@ -124,13 +137,51 @@ docker compose exec mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON larave
 テスト実行：
 
 docker compose exec php vendor/bin/phpunit
-# または
+
+または
+
 docker compose exec php php artisan test
 
 ---
 
 ### ※テーブル数
 
-users / items / orders / categories / category_item / likes / comments / addresses / stripe_events
 
-総テーブル数9（migrations等のLaravel標準テーブルは除外）
+要件の「テーブル数9個以内」は、本アプリで利用する主要テーブル（users / items / orders / categories / category_item / likes / comments / addresses / stripe_events
+）を対象として解釈し、合計9個。
+
+なお、Laravel標準の補助テーブル(password_resets等)はフレームワーク機能のため、要件の対象外として解釈。
+
+---
+
+## トラブルシューティング
+
+- 支払い後も pending / 商品が processing のままで変わらない
+
+→コンビニ決済は非同期のため、支払い確定（paid 反映）は Webhook受信により行われます。
+
+ローカル環境（APP_URL=http://localhost）では Stripe が localhost に直接Webhookを送れないため、Stripe CLIの転送が必須です。
+
+- ローカルで反映されない場合（5分以上 pending のまま）
+
+1) Stripe CLI の転送が起動しているか確認（別ターミナル）
+
+```bash
+stripe listen --forward-to http://localhost/stripe/webhook
+```
+
+2) .env の STRIPE_WEBHOOK_SECRET が stripe listen に表示された whsec_... と一致しているか確認
+
+    (変更した場合は設定反映)
+
+```bash
+docker compose exec php php artisan config:clear
+```
+
+Webhookがアプリに届いているかログ確認
+
+```bash
+docker compose exec php tail -n 200 storage/logs/laravel.log
+```
+
+補足：本番（公開URLの環境）では Stripe CLI は不要です。Stripe DashboardでWebhook送信先を公開URLに設定し、発行された whsec_... を STRIPE_WEBHOOK_SECRET に設定してください。

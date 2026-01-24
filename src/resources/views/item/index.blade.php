@@ -30,7 +30,7 @@ $keyword = request('keyword');
     @forelse($items as $item)
     <div class="list__card">
         <div class="list__card-image">
-            <img src="{{ $item->image_path ? asset('storage/'.$item->image_path) : '' }}" alt="{{ $item->name }}">
+            <a href="{{ route('items.show', $item) }}"><img src="{{ $item->image_path ? asset('storage/'.$item->image_path) : '' }}" alt="{{ $item->name }}"></a>
         </div>
         <div class="list__card-name">
             <a class="list__card-name" href="{{ route('items.show', $item) }}">{{ $item->name }}</a>
