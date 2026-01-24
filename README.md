@@ -95,14 +95,16 @@ Mailhog: http://localhost:8025
 ### Stripe / Webhook（購入機能）
 
 本アプリは Stripe を利用します。ローカルで決済フローを確認する場合は `.env` に Stripe のテストキーを設定してください。  
-支払い結果（成功/キャンセル等）の反映に Webhook を利用します。
 
-Webhook受信エンドポイント: `POST /stripe/webhook`（route name: `stripe.webhook`）
+- コンビニ決済の確定反映（paid反映）にはWebhookを使用します。
 
-### ローカルでWebhookを受信する（Stripe CLI必須：APP_URL=http://localhost の場合）
+- ローカル環境（APP_URL=http://localhost）ではStripeがlocalhostへWebhook送信できないため、コンビニ決済の動作確認にはStripe CLIでWebhook転送が必要です。
 
-Stripeは `localhost` へ直接Webhookを送信できないため、ローカルで決済結果（特にコンビニ決済）を反映するには  
-Stripe CLIでWebhookを転送してください。
+- Webhook受信エンドポイント: POST /stripe/webhook（route name: stripe.webhook）
+
+---
+
+### ローカルでWebhookを受信する（Stripe CLI必須：コンビニ決済をローカルで確定反映させる場合）
 
 1) Stripe CLIを起動（別ターミナル）
 
@@ -122,9 +124,9 @@ stripe listen --forward-to http://localhost/stripe/webhook
 docker compose exec php php artisan config:clear
 ```
 
-※ stripe listen は起動し続けてください。停止するとWebhookが届かず、注文が pending のままになります。
+※　【ローカル検証時のみ】stripe listen は起動し続けてください。停止するとWebhookが届かず、注文が「pending」のままになります。
 
-※ コンビニ決済は非同期のため、Webhookが動いていないと購入確定（paid反映）しません。
+※　コンビニ決済は非同期のため、Webhook未受信だと「paid」になりません（ローカルではStripe CLI転送が必要／本番は公開URLにWebhook設定）。
 
 ---
 
@@ -133,19 +135,24 @@ docker compose exec php php artisan config:clear
 phpunit.xml は laravel_test を参照します。DBを作成し、権限を付与してください。
 
 docker compose exec mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS laravel_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
 docker compose exec mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON laravel_test.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
+
 テスト実行：
 
+```bash
 docker compose exec php vendor/bin/phpunit
+```
 
 または
 
+```bash
 docker compose exec php php artisan test
+```
 
 ---
 
 ### ※テーブル数
-
 
 要件の「テーブル数9個以内」は、本アプリで利用する主要テーブル（users / items / orders / categories / category_item / likes / comments / addresses / stripe_events
 ）を対象として解釈し、合計9個。
