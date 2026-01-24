@@ -26,6 +26,7 @@ services:
       XDG_DATA_HOME: /home/app/.local/share
     volumes:
       - ./src:/var/www
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
     depends_on:
       - mysql
 

@@ -28,8 +28,9 @@
         <label for="profile_image" class="profile__image-choice-button">
             画像を選択する
         </label>
-
-        @error('profile_image') <p class="form__error">{{ $message }}</p> @enderror
+        <div class="form__error-wrap">
+            @error('profile_image') <p class="form__error">{{ $message }}</p> @enderror
+        </div>
     </div>
 
     <div class="profile__inner">
@@ -40,7 +41,7 @@
         </div>
         <label class="profile__label">郵便番号</label>
         <div class="profile__form-item">
-            <input type="text" class="profile__form-input" name="postal_code" value="{{ old('postal_code', optional($address)->postal_code) }}">
+            <input type="text" inputmode="numeric" class="profile__form-input" name="postal_code" value="{{ old('postal_code', optional($address)->postal_code) }}">
             @error('postal_code') <p class="form__error">{{ $message }}</p> @enderror
         </div>
         <label class="profile__label">住所</label>
@@ -59,4 +60,42 @@
     </div>
 </form>
 
+@endsection
+
+@section('js')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('profile_image');
+        if (!input) return;
+
+        const container = document.querySelector('.profile__header-image');
+        if (!container) return;
+
+        let currentObjectUrl = null;
+
+        input.addEventListener('change', () => {
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            if (!file.type || !file.type.startsWith('image/')) return;
+
+            if (currentObjectUrl) {
+                URL.revokeObjectURL(currentObjectUrl);
+                currentObjectUrl = null;
+            }
+
+            currentObjectUrl = URL.createObjectURL(file);
+
+            let img = container.querySelector('img');
+            if (!img) {
+                img = document.createElement('img');
+                img.alt = 'プロフィール画像';
+                container.innerHTML = '';
+                container.appendChild(img);
+            }
+
+            img.src = currentObjectUrl;
+        });
+    });
+</script>
 @endsection

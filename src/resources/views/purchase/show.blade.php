@@ -13,7 +13,7 @@ $paymentLabel = $paymentMethods[$selectedPayment] ?? $paymentMethods[''] ?? '選
 @section('content')
 
 <div class="purchase__grid">
-    <form action="{{route('purchase.checkout',$item)}}" class="purchase__button" method="post">
+    <form action="{{route('purchase.checkout',$item)}}" class="purchase__button" method="post" target="_blank">
         @csrf
         @if($address)
         <input type="hidden" name="address_id" value="{{ $address->id }}">

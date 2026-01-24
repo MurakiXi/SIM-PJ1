@@ -225,7 +225,6 @@ class PurchaseController extends Controller
             $lockedOrder->update([
                 'payment_status' => 'canceled',
                 'canceled_at' => now(),
-                'reserved_until' => null,
             ]);
 
             $wasCanceled = true;

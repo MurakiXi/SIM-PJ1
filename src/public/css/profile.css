@@ -75,9 +75,16 @@
     padding-left: 10px;
 }
 
+.form__error-wrap {
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+}
+
 .form__error {
     margin: 0;
     color: #ff5555;
+    font-weight: bold;
 }
 
 .profile__form-button {

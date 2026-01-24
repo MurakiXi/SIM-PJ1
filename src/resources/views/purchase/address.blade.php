@@ -20,7 +20,7 @@
 
         <div class="edit-address__form-item">
             <div class="edit-address__form-label">郵便番号</div>
-            <input type="text" class="edit-address__form-input" name="postal_code" value="{{ old('postal_code', optional($address)->postal_code) }}">
+            <input type="text" inputmode="numeric" class="edit-address__form-input" name="postal_code" value="{{ old('postal_code', optional($address)->postal_code) }}">
             @error('postal_code') <p class="form__error">{{ $message }}</p> @enderror
         </div>
         <div class="edit-address__form-item">

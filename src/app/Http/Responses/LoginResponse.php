@@ -14,6 +14,6 @@ class LoginResponse implements LoginResponseContract
             return redirect()->route('verification.notice');
         }
 
-        return redirect()->route('items.index');
+        return redirect()->intended(config('fortify.home'));
     }
 }
