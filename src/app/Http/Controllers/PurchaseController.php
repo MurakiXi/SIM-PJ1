@@ -28,7 +28,11 @@ class PurchaseController extends Controller
 
         $user = $request->user();
 
-        if ($item->seller_id === $user->id) abort(403);
+        if ($item->seller_id === $user->id) {
+            return redirect()
+                ->route('items.show', $item)
+                ->with('error', '出品者は自分の商品を購入できません。');
+        }
         if ($item->status === 'sold') abort(404);
         if ($item->activeOrder()->exists()) abort(404);
 
