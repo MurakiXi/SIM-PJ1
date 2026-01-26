@@ -37,8 +37,6 @@ cd SIM-PJ1
 docker compose up -d --build
 ```
 
-※ docker-compose の環境では `docker-compose up -d --build` でも可
-
 ### 2. Laravel 初期化（php コンテナ内）
 
 ```bash
@@ -54,7 +52,7 @@ php artisan optimize:clear
 
 src/.env（コンテナ内では /var/www/.env）を以下に合わせてください。
 
-```bash
+```env
 APP_URL=http://localhost
 
 DB_CONNECTION=mysql
@@ -66,10 +64,6 @@ DB_PASSWORD=laravel_pass
 
 MAIL_HOST=mailhog
 MAIL_PORT=1025
-
-STRIPE_KEY=
-STRIPE_SECRET=
-STRIPE_WEBHOOK_SECRET=
 ```
 
 ### 4. マイグレーション・シーディング(phpコンテナ内)
@@ -94,9 +88,7 @@ email: buyer@example.com
 
 password: testpass2
 
----
-
-### URL一覧
+### 6.URL一覧
 
 アプリ: http://localhost
 
@@ -104,46 +96,69 @@ phpMyAdmin: http://localhost:8080
 
 Mailhog: http://localhost:8025
 
----
+### 7. Stripe / Webhook（購入機能のローカル検証：任意）
 
-### Stripe / Webhook（購入機能）
+（閲覧・出品・いいね等の確認だけなら、この章は飛ばして構いません）
 
-本アプリは Stripe を利用します。ローカルで決済フローを確認する場合は `.env` に Stripe のテストキーを設定してください。
+本アプリは Stripe を利用します。購入機能をローカルで検証する場合のみ、.env にStripeのテストキーを設定してください。
 
-- コンビニ決済の確定反映（paid反映）にはWebhookを使用します。
+**7-1. Stripe テストキー（STRIPE_KEY / STRIPE_SECRET）を取得して設定**
 
-- ローカル環境（APP_URL=http://localhost）ではStripeがlocalhostへWebhook送信できないため、コンビニ決済の動作確認にはStripe CLIでWebhook転送が必要です。
+Stripe ダッシュボード（テストモード）の Developers → API keys から取得します。
 
-- Webhook受信エンドポイント: POST /stripe/webhook（route name: stripe.webhook）
+- 公開可能キー（pk*test*...）→ STRIPE_KEY
 
----
+- シークレットキー（sk*test*...）→ STRIPE_SECRET
 
-### ローカルでWebhookを受信する（Stripe CLI必須：コンビニ決済をローカルで確定反映させる場合）
+```env
+STRIPE_KEY=pk_test_xxxxxxxxxxxxx
+STRIPE_SECRET=sk_test_xxxxxxxxxxxxx
+```
+
+**7-2. Webhook（コンビニ決済の paid 反映）をローカルで受信する**
+
+コンビニ決済は非同期のため、Webhook 受信がないと注文が paid になりません。
+
+ローカル環境（APP_URL=http://localhost）では Stripe が localhost へ直接Webhook送信できないため、Stripe CLI で転送します
 
 1. Stripe CLIを起動（別ターミナル）
+
+以下のコマンド実行後に表示される whsec\_... を .env の STRIPE_WEBHOOK_SECRET に設定してください。
+
+（CLIでローカル検証する場合、この whsec\_... がエンドポイントのsecretになります）
 
 ```bash
 stripe login
 stripe listen --forward-to http://localhost/stripe/webhook
 ```
 
-コマンド実行後に表示される whsec\_... を .env の STRIPE_WEBHOOK_SECRET に設定してください。
-
-2. stripe listen 実行後に表示される whsec\_... を .env の STRIPE_WEBHOOK_SECRET に設定
-
-3. 設定反映（phpコンテナ内）
-
-```bash
-docker compose exec php php artisan config:clear
+```env
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
 ```
 
-※　【ローカル検証時のみ】stripe listen は起動し続けてください。停止するとWebhookが届かず、注文が「pending」のままになります。
+※ローカル検証中は stripe listen を起動し続けてください。止めるとWebhookが届かず、コンビニ決済が pending のままになります。
 
-※　コンビニ決済は非同期のため、Webhook未受信だと「paid」になりません（ローカルではStripe CLI転送が必要／本番は公開URLにWebhook設定）。
+**7-3. 設定反映（phpコンテナ内）**
+
+```bash
+docker compose exec php php artisan optimize:clear
+```
+
+※　コンビニ決済は非同期のため、Webhook未受信だと「paid」になりません（ローカル環境ではStripe CLI転送が必要／本番環境は公開URLにWebhook設定）。
+
+**7-4. 補足：**
+
+- Webhook受信エンドポイント
+
+Webhook受信エンドポイント: POST /stripe/webhook（route name: stripe.webhook）
+
+- 支払い完了後、Webhook受信により注文が paid になり、画面上のステータスが Sold に変化します。反映まで少し時間がかかる場合があります。
+
+- 本番環境ではコンビニ決済完了後にWebhookが送受信され、statusがSoldに変化します(CLI転送不要)
 
 ---
 
-### テスト実行（重要：laravel_test DB）
+## テスト実行（重要：laravel_test DB）
 
 phpunit.xml は laravel_test を参照します。DBを作成し、権限を付与してください。
 
