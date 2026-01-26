@@ -72,9 +72,7 @@ MAIL_PORT=1025
 php artisan migrate --seed
 ```
 
-### 動作確認用ダミーユーザー（Seeder）
-
----
+### 5.動作確認用ダミーユーザー（Seeder）
 
 出品者
 
@@ -96,13 +94,15 @@ phpMyAdmin: http://localhost:8080
 
 Mailhog: http://localhost:8025
 
-### 7. Stripe / Webhook（購入機能のローカル検証：任意）
+---
+
+## Stripe / Webhook（購入機能のローカル検証：任意）
 
 （閲覧・出品・いいね等の確認だけなら、この章は飛ばして構いません）
 
 本アプリは Stripe を利用します。購入機能をローカルで検証する場合のみ、.env にStripeのテストキーを設定してください。
 
-**7-1. Stripe テストキー（STRIPE_KEY / STRIPE_SECRET）を取得して設定**
+**1) Stripe テストキー（STRIPE_KEY / STRIPE_SECRET）を取得して設定**
 
 Stripe ダッシュボード（テストモード）の Developers → API keys から取得します。
 
@@ -115,7 +115,7 @@ STRIPE_KEY=pk_test_xxxxxxxxxxxxx
 STRIPE_SECRET=sk_test_xxxxxxxxxxxxx
 ```
 
-**7-2. Webhook（コンビニ決済の paid 反映）をローカルで受信する**
+**2) Webhook（コンビニ決済の paid 反映）をローカルで受信する**
 
 コンビニ決済は非同期のため、Webhook 受信がないと注文が paid になりません。
 
@@ -138,7 +138,7 @@ STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
 
 ※ローカル検証中は stripe listen を起動し続けてください。止めるとWebhookが届かず、コンビニ決済が pending のままになります。
 
-**7-3. 設定反映（phpコンテナ内）**
+**3) 設定反映（phpコンテナ内）**
 
 ```bash
 docker compose exec php php artisan optimize:clear
@@ -146,7 +146,7 @@ docker compose exec php php artisan optimize:clear
 
 ※　コンビニ決済は非同期のため、Webhook未受信だと「paid」になりません（ローカル環境ではStripe CLI転送が必要／本番環境は公開URLにWebhook設定）。
 
-**7-4. 補足：**
+**4) 補足：**
 
 - Webhook受信エンドポイント
 
@@ -171,6 +171,7 @@ Webhook受信エンドポイント: POST /stripe/webhook（route name: stripe.we
 ※要件通りの最小実装であれば必須ではありませんが、実運用で起こり得る並行操作・非同期確定を考慮し、
 整合性（同一商品が同時に複数人へ販売されないこと）を強める目的で導入しています。
 
+---
 
 ## テスト実行（重要：laravel_test DB）
 
@@ -191,10 +192,9 @@ docker compose exec php vendor/bin/phpunit
 ```bash
 docker compose exec php php artisan test
 ```
-
 ---
 
-### ※テーブル数
+## 補足：テーブル数
 
 要件の「テーブル数9個以内」は、本アプリで利用する主要テーブル（users / items / orders / categories / category_item / likes / comments / addresses / stripe_events
 ）を対象として解釈し、合計9個。
