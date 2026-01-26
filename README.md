@@ -209,7 +209,7 @@ docker compose exec php php artisan test
 
 →コンビニ決済は非同期のため、支払い確定（paid 反映）は Webhook受信により行われます。
 
-ローカル環境（APP_URL=http://localhost）では Stripe が localhost に直接Webhookを送れないため、Stripe CLIの転送が必須です。
+ローカル環境（APP_URL=http://localhost ）では Stripe が localhost に直接Webhookを送れないため、Stripe CLIの転送が必須です。
 
 - ローカルで反映されない場合（5分以上 pending のまま）
 
