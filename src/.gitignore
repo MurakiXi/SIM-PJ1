@@ -27,6 +27,9 @@ yarn-error.log
 !/storage/framework/cache/
 /storage/framework/cache/*
 !/storage/framework/cache/.gitkeep
+!/storage/framework/cache/data/
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitkeep
 
 !/storage/framework/sessions/
 /storage/framework/sessions/*
