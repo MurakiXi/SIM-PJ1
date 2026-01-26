@@ -55,7 +55,11 @@
 
         <div class="show__purchase-button">
             @if($item->status === 'on_sale')
+            @if(auth()->id() === $item->seller_id)
+            <div class="show__purchase">出品者は購入できません</div>
+            @else
             <a href="{{ route('purchase.show', $item) }}" class="show__purchase">購入手続きへ</a>
+            @endif
             @elseif($item->status === 'processing')
             <div class="show__purchase">購入手続き中</div>
             @else
