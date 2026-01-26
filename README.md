@@ -1,9 +1,11 @@
 # SIM-PJ1（coachtechフリマ）
+
 Laravel 8 を用いたフリマアプリ（Docker環境）。
 
 ---
 
 ## 構成（使用コンテナ / ポート）
+
 - nginx: http://localhost（80）
 - phpMyAdmin: http://localhost:8080
 - Mailhog（メールUI）: http://localhost:8025
@@ -13,6 +15,7 @@ Laravel 8 を用いたフリマアプリ（Docker環境）。
 ---
 
 ## 使用技術
+
 - PHP 8.1（Docker / php:8.1-fpm）
 - Laravel 8.x
 - MySQL 8.0.26
@@ -32,8 +35,10 @@ Laravel 8 を用いたフリマアプリ（Docker環境）。
 git clone https://github.com/MurakiXi/SIM-PJ1.git
 cd SIM-PJ1
 docker compose up -d --build
-# ※ docker-compose の環境では `docker-compose up -d --build` でも可
 ```
+
+※ docker-compose の環境では `docker-compose up -d --build` でも可
+
 ### 2. Laravel 初期化（php コンテナ内）
 
 ```bash
@@ -42,10 +47,11 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan storage:link
-php artisan migrate --seed
+php artisan optimize:clear
 ```
 
 ### 3. .env 設定（重要）
+
 src/.env（コンテナ内では /var/www/.env）を以下に合わせてください。
 
 ```bash
@@ -66,8 +72,16 @@ STRIPE_SECRET=
 STRIPE_WEBHOOK_SECRET=
 ```
 
+### 4. マイグレーション・シーディング(phpコンテナ内)
+
+```bash
+php artisan migrate --seed
+```
+
 ### 動作確認用ダミーユーザー（Seeder）
+
 ---
+
 出品者
 
 email: seller@example.com
@@ -94,7 +108,7 @@ Mailhog: http://localhost:8025
 
 ### Stripe / Webhook（購入機能）
 
-本アプリは Stripe を利用します。ローカルで決済フローを確認する場合は `.env` に Stripe のテストキーを設定してください。  
+本アプリは Stripe を利用します。ローカルで決済フローを確認する場合は `.env` に Stripe のテストキーを設定してください。
 
 - コンビニ決済の確定反映（paid反映）にはWebhookを使用します。
 
@@ -106,19 +120,18 @@ Mailhog: http://localhost:8025
 
 ### ローカルでWebhookを受信する（Stripe CLI必須：コンビニ決済をローカルで確定反映させる場合）
 
-1) Stripe CLIを起動（別ターミナル）
+1. Stripe CLIを起動（別ターミナル）
 
 ```bash
 stripe login
 stripe listen --forward-to http://localhost/stripe/webhook
 ```
 
-コマンド実行後に表示される whsec_... を .env の STRIPE_WEBHOOK_SECRET に設定してください。
+コマンド実行後に表示される whsec\_... を .env の STRIPE_WEBHOOK_SECRET に設定してください。
 
+2. stripe listen 実行後に表示される whsec\_... を .env の STRIPE_WEBHOOK_SECRET に設定
 
-2) stripe listen 実行後に表示される whsec_... を .env の STRIPE_WEBHOOK_SECRET に設定
-
-3) 設定反映（phpコンテナ内）
+3. 設定反映（phpコンテナ内）
 
 ```bash
 docker compose exec php php artisan config:clear
@@ -136,7 +149,7 @@ phpunit.xml は laravel_test を参照します。DBを作成し、権限を付�
 
 docker compose exec mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS laravel_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-docker compose exec mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON laravel_test.* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
+docker compose exec mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON laravel_test.\* TO 'laravel_user'@'%'; FLUSH PRIVILEGES;"
 
 テスト実行：
 
@@ -171,15 +184,15 @@ docker compose exec php php artisan test
 
 - ローカルで反映されない場合（5分以上 pending のまま）
 
-1) Stripe CLI の転送が起動しているか確認（別ターミナル）
+1. Stripe CLI の転送が起動しているか確認（別ターミナル）
 
 ```bash
 stripe listen --forward-to http://localhost/stripe/webhook
 ```
 
-2) .env の STRIPE_WEBHOOK_SECRET が stripe listen に表示された whsec_... と一致しているか確認
+2. .env の STRIPE*WEBHOOK_SECRET が stripe listen に表示された whsec*... と一致しているか確認
 
-    (変更した場合は設定反映)
+   (変更した場合は設定反映)
 
 ```bash
 docker compose exec php php artisan config:clear
@@ -191,4 +204,4 @@ Webhookがアプリに届いているかログ確認
 docker compose exec php tail -n 200 storage/logs/laravel.log
 ```
 
-補足：本番（公開URLの環境）では Stripe CLI は不要です。Stripe DashboardでWebhook送信先を公開URLに設定し、発行された whsec_... を STRIPE_WEBHOOK_SECRET に設定してください。
+補足：本番（公開URLの環境）では Stripe CLI は不要です。Stripe DashboardでWebhook送信先を公開URLに設定し、発行された whsec\_... を STRIPE_WEBHOOK_SECRET に設定してください。
